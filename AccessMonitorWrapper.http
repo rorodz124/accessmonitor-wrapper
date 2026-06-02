@@ -1,6 +1,27 @@
-@AccessMonitorWrapper_HostAddress = http://localhost:5296
+@AccessMonitorWrapper_HostAddress = http://localhost:8080
 
-GET {{AccessMonitorWrapper_HostAddress}}/weatherforecast/
-Accept: application/json
+### Validate a URL
+POST {{AccessMonitorWrapper_HostAddress}}/api/validate
+Content-Type: application/json
+
+{
+  "url": "https://example.com/"
+}
+
+### Validate with invalid URL (should return 400)
+POST {{AccessMonitorWrapper_HostAddress}}/api/validate
+Content-Type: application/json
+
+{
+  "url": "not-a-url"
+}
+
+### Validate with empty URL (should return 400)
+POST {{AccessMonitorWrapper_HostAddress}}/api/validate
+Content-Type: application/json
+
+{
+  "url": ""
+}
 
 ###

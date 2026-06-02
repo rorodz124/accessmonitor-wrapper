@@ -1,4 +1,4 @@
-namespace AccessMonitorWrapperClean.Models;
+namespace AccessMonitorWrapper.Models;
 
 public class ValidateRequest
 {

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Y2aRSoK/+BQ=",
+  "dgSpecHash": "By24Qzt50kI=",
   "success": true,
-  "projectFilePath": "C:\\Projetos\\AccessMonitorWrapper\\AccessMonitorWrapper.csproj",
+  "projectFilePath": "C:\\Users\\User\\.gemini\\antigravity\\scratch\\AccessMonitorWrapper\\AccessMonitorWrapper.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\User\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.14\\microsoft.aspnetcore.openapi.9.0.14.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"

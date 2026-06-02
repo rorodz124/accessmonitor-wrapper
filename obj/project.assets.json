@@ -81,11 +81,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Projetos\\AccessMonitorWrapper\\AccessMonitorWrapper.csproj",
+      "projectUniqueName": "C:\\Users\\User\\.gemini\\antigravity\\scratch\\AccessMonitorWrapper\\AccessMonitorWrapper.csproj",
       "projectName": "AccessMonitorWrapper",
-      "projectPath": "C:\\Projetos\\AccessMonitorWrapper\\AccessMonitorWrapper.csproj",
+      "projectPath": "C:\\Users\\User\\.gemini\\antigravity\\scratch\\AccessMonitorWrapper\\AccessMonitorWrapper.csproj",
       "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-      "outputPath": "C:\\Projetos\\AccessMonitorWrapper\\obj\\",
+      "outputPath": "C:\\Users\\User\\.gemini\\antigravity\\scratch\\AccessMonitorWrapper\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

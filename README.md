@@ -1,97 +1,24 @@
 # AccessMonitor Wrapper API
 
-## Contexto
+## O que é
 
-Este projeto consiste numa API em C# .NET Core que funciona como wrapper para o AccessMonitor, uma ferramenta open source da AMA usada para avaliar a acessibilidade de paginas web segundo criterios WCAG.
+API em C# .NET 9 que funciona como wrapper para o [AccessMonitor](https://github.com/amagovpt/accessmonitor-docker), uma ferramenta open source da AMA para avaliar a acessibilidade de páginas web segundo critérios WCAG.
 
-O objetivo e expor uma API simples para clientes internos, escondendo os detalhes tecnicos do AccessMonitor, que corre separadamente em Docker.
+O objetivo é expor uma API simples onde o utilizador envia um URL e recebe o relatório de acessibilidade.
 
-Fluxo geral:
-
-```text
-Cliente -> API C# -> AccessMonitor Docker -> Relatorio de acessibilidade
-```
-
-## AccessMonitor
-
-O AccessMonitor usado neste projeto vem do repositorio:
+## Como funciona
 
 ```text
-https://github.com/amagovpt/accessmonitor-docker
+Cliente → POST /api/validate → Wrapper API → AccessMonitor Docker → Relatório JSON
 ```
 
-Comandos base:
+1. O cliente envia um URL.
+2. A API valida o URL e converte-o para Base64.
+3. A API chama o AccessMonitor (`GET /amp/eval/{urlBase64}`) com o header `Referer`.
+4. O AccessMonitor avalia a acessibilidade da página.
+5. O relatório JSON é devolvido ao cliente.
 
-```powershell
-git clone https://github.com/amagovpt/accessmonitor-docker
-cd accessmonitor-docker
-Copy-Item .env.example .env
-docker build -t accessmonitor-docker .
-docker run --env-file .env -p 3000:3000 accessmonitor-docker
-```
-
-Depois de arrancar, fica disponivel em:
-
-```text
-http://localhost:3000
-```
-
-## Contrato Descoberto
-
-Endpoint correto para validar uma pagina por URL:
-
-```http
-GET /amp/eval/{urlEmBase64}
-```
-
-Rotas descobertas:
-
-```text
-GET  /health
-GET  /amp/eval/:url
-POST /amp/eval/html
-```
-
-Exemplo de pedido final, depois de converter `https://example.com/` para Base64:
-
-```text
-http://localhost:3000/amp/eval/aHR0cHM6Ly9leGFtcGxlLmNvbS8=
-```
-
-## Header Referer
-
-O AccessMonitor pode exigir o header `Referer`, dependendo da variavel de ambiente `REFERER`.
-
-```http
-Referer: http://localhost:3000
-```
-
-Sem este header, a API pode responder com `403 Forbidden`.
-
-## Teste Manual
-
-Exemplo de teste no PowerShell:
-
-```powershell
-$url = "https://example.com/"
-$encoded = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($url))
-
-Invoke-RestMethod `
-  -Uri "http://localhost:3000/amp/eval/$encoded" `
-  -Headers @{
-    Referer = "http://localhost:3000"
-  }
-```
-
-Health check:
-
-```powershell
-Invoke-RestMethod "http://localhost:3000/health"
-```
-
-## API C# a Construir
-
-A nossa API vai expor:
+## Endpoint
 
 ```http
 POST /api/validate
@@ -104,96 +31,105 @@ Content-Type: application/json
 }
 ```
 
-Internamente, a API deve:
+### Respostas
 
-1. Receber a URL.
-2. Validar se a URL e valida.
-3. Converter a URL para Base64.
-4. Chamar `GET /amp/eval/{urlBase64}` no AccessMonitor.
-5. Enviar o header `Referer`.
-6. Validar status code e content type da resposta.
-7. Devolver o relatorio JSON ao cliente.
-8. Tratar falhas, timeouts e respostas inesperadas.
+| Código | Significado |
+|--------|-------------|
+| `200 OK` | Relatório de acessibilidade devolvido com sucesso |
+| `400 Bad Request` | URL em falta, vazio, ou inválido |
+| `502 Bad Gateway` | Erro de comunicação com o AccessMonitor |
+| `504 Gateway Timeout` | O AccessMonitor não respondeu a tempo |
 
 ## Estrutura do Projeto
 
-Estrutura:
-
 ```text
 AccessMonitorWrapper/
-|-- Controllers/
-|   |-- AccessibilityController.cs
-|-- Services/
-|   |-- AccessMonitorService.cs
-|-- Models/
-|   |-- ValidateRequest.cs
-|-- Program.cs
-|-- Dockerfile
-|-- docker-compose.yml
+├── Controllers/
+│   └── AccessibilityController.cs    # Endpoint POST /api/validate
+├── Services/
+│   └── AccessMonitorService.cs       # Comunicação com o AccessMonitor
+├── Models/
+│   └── ValidateRequest.cs            # Modelo do pedido { url }
+├── Program.cs                        # Configuração e DI
+├── Dockerfile                        # Build multi-stage da API
+├── docker-compose.yml                # Orquestração dos dois serviços
+├── appsettings.json                  # Configuração base
+└── appsettings.Development.json      # Configuração de desenvolvimento
 ```
 
-Modelo inicial em `Models/ValidateRequest.cs`:
+## Pré-requisitos
 
-```csharp
-namespace AccessMonitorWrapper.Models;
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [Docker](https://www.docker.com/) (para correr o AccessMonitor)
 
-public class ValidateRequest
-{
-    public string? Url { get; set; }
-}
+## Como correr
+
+### 1. Arrancar o AccessMonitor em Docker
+
+```powershell
+git clone https://github.com/amagovpt/accessmonitor-docker
+cd accessmonitor-docker
+Copy-Item .env.example .env
+docker build -t accessmonitor-docker .
+docker run --env-file .env -p 3000:3000 accessmonitor-docker
 ```
 
-## Docker Compose
+Verificar que está a correr:
 
-O projeto devera subir dois servicos:
-
-- `accessmonitor`: API original do AccessMonitor
-- `wrapper-api`: API C# deste projeto
-
-Dentro do Docker Compose, a API C# deve chamar o AccessMonitor pelo nome do servico:
-
-```text
-http://accessmonitor:3000
+```powershell
+Invoke-RestMethod "http://localhost:3000/health"
 ```
 
-Fluxo:
+### 2. Arrancar a Wrapper API
 
-```text
-Cliente -> http://localhost:8080/api/validate -> wrapper-api -> http://accessmonitor:3000
+```powershell
+cd AccessMonitorWrapper
+dotnet run
 ```
 
-## Configuracao
+A API fica disponível em `http://localhost:8080` (ou a porta indicada no output).
 
-Variaveis de ambiente previstas:
+### 3. Testar
+
+```powershell
+Invoke-RestMethod -Method Post -Uri "http://localhost:8080/api/validate" `
+  -ContentType "application/json" `
+  -Body '{"url":"https://example.com/"}'
+```
+
+Ou usar o ficheiro `AccessMonitorWrapper.http` no Visual Studio / VS Code com a extensão REST Client.
+
+### Alternativa: Docker Compose (tudo junto)
+
+> **Nota:** Requer que o repo `accessmonitor-docker` esteja clonado na pasta ao lado deste projeto.
+
+```powershell
+docker compose up --build
+```
+
+Isto arranca os dois serviços:
+
+- `accessmonitor` na porta `3000`
+- `wrapper-api` na porta `8080`
+
+## Configuração
+
+A API lê a configuração do AccessMonitor via `appsettings.json` ou variáveis de ambiente:
+
+| Variável | Default | Descrição |
+|----------|---------|-----------|
+| `AccessMonitor:BaseUrl` | `http://localhost:3000` | URL base do AccessMonitor |
+| `AccessMonitor:Referer` | `http://localhost:3000` | Header Referer exigido pelo AccessMonitor |
+
+Em Docker Compose, estas variáveis são definidas automaticamente:
 
 ```text
 AccessMonitor__BaseUrl=http://accessmonitor:3000
 AccessMonitor__Referer=http://localhost:3000
 ```
 
-Em desenvolvimento local fora de Docker Compose:
+## Notas técnicas
 
-```text
-AccessMonitor__BaseUrl=http://localhost:3000
-AccessMonitor__Referer=http://localhost:3000
-```
-
-## Estado Atual
-
-Ja foi feito:
-
-- AccessMonitor executado em Docker.
-- Rotas reais descobertas atraves dos logs.
-- Endpoint correto identificado: `GET /amp/eval/{urlBase64}`.
-- Necessidade do header `Referer` identificada.
-- Modelo inicial `ValidateRequest` preparado.
-
-Ainda falta:
-
-- Criar `AccessMonitorService`.
-- Criar `AccessibilityController`.
-- Configurar `Program.cs`.
-- Criar `Dockerfile`.
-- Criar `docker-compose.yml`.
-- Testar o fluxo completo.
-- Inicializar Git e organizar commits.
+- O AccessMonitor espera o URL codificado em **Base64** no path: `GET /amp/eval/{urlBase64}`.
+- O header `Referer` é obrigatório — sem ele, o AccessMonitor responde `403 Forbidden`.
+- O timeout do HttpClient está definido para **120 segundos** (a avaliação pode demorar).
