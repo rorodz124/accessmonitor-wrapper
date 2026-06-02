@@ -89,6 +89,10 @@ dotnet run
 
 A API fica disponível em `http://localhost:8080` (ou a porta indicada no output).
 
+A página de teste simples estará disponível na raiz do serviço, por exemplo `http://localhost:8080/`. Nessa página basta inserir um URL e clicar em Avaliar para obter o relatório.
+
+Em desenvolvimento, a Swagger UI também estará disponível em `http://localhost:8080/swagger` para ver a documentação do endpoint.
+
 ### 3. Testar
 
 ```powershell

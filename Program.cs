@@ -1,4 +1,5 @@
 using AccessMonitorWrapper.Services;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,15 @@ builder.Services.AddControllers();
 
 // OpenAPI / Swagger
 builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "AccessMonitor Wrapper API",
+        Version = "v1",
+        Description = "Interface para testar a validação de acessibilidade via AccessMonitor."
+    });
+});
 
 // Register AccessMonitorService with a typed HttpClient
 builder.Services.AddHttpClient<AccessMonitorService>((sp, client) =>
@@ -24,8 +34,18 @@ builder.Services.AddHttpClient<AccessMonitorService>((sp, client) =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 if (app.Environment.IsDevelopment())
 {
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "AccessMonitor Wrapper API v1");
+        options.RoutePrefix = "swagger";
+    });
+
     app.MapOpenApi();
 }
 

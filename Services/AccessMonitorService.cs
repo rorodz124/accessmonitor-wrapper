@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace AccessMonitorWrapper.Services;
@@ -23,12 +24,12 @@ public class AccessMonitorService
     {
         var urlBytes = System.Text.Encoding.UTF8.GetBytes(url);
         var urlBase64 = Convert.ToBase64String(urlBytes);
-
-        var requestUri = $"/amp/eval/{urlBase64}";
+        var requestUri = $"/amp/eval/{Uri.EscapeDataString(urlBase64)}";
 
         _logger.LogInformation("Calling AccessMonitor: {RequestUri}", requestUri);
 
         using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+        request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
         // The AccessMonitor may require a Referer header (configured via env vars)
         // The Referer is set at HttpClient level via the base configuration
@@ -65,7 +66,7 @@ public class AccessMonitorService
 
         var contentType = response.Content.Headers.ContentType?.MediaType;
 
-        if (contentType != "application/json")
+        if (contentType == null || !contentType.StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
         {
             _logger.LogWarning(
                 "AccessMonitor returned unexpected Content-Type '{ContentType}' for URL: {Url}",
