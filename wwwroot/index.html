@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Validador de Acessibilidade</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 24px;
+      background: #f5f7fb;
+      color: #1e293b;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      padding: 28px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 16px;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #93c5fd;
+      cursor: not-allowed;
+    }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 10px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .notice {
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: #e2e8f0;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Validador de Acessibilidade</h1>
+    <p>Coloque um URL e clique em Avaliar</p>
+
+    <label for="urlInput">URL</label>
+    <input id="urlInput" type="text" placeholder="https://example.com" />
+    <button id="submitButton">Avaliar</button>
+
+    <div id="result" style="margin-top: 24px;"></div>
+  </div>
+
+  <script>
+    const formButton = document.getElementById('submitButton');
+    const urlInput = document.getElementById('urlInput');
+    const resultContainer = document.getElementById('result');
+
+    formButton.addEventListener('click', async () => {
+      const url = urlInput.value.trim();
+      resultContainer.innerHTML = '';
+
+      if (!url) {
+        resultContainer.innerHTML = '<p style="color:#b91c1c">Por favor, insira um URL válido.</p>';
+        return;
+      }
+
+      formButton.disabled = true;
+      formButton.textContent = 'A avaliar...';
+
+      try {
+        const response = await fetch('/api/validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+
+        const body = await response.text();
+        let formatted = body;
+
+        try {
+          formatted = JSON.stringify(JSON.parse(body), null, 2);
+        } catch (err) {
+          formatted = body;
+        }
+
+        if (!response.ok) {
+          resultContainer.innerHTML = `<p style="color:#b91c1c">Erro ${response.status}: ${response.statusText}</p><pre>${formatted}</pre>`;
+        } else {
+          resultContainer.innerHTML = `<h2>Relatório</h2><pre>${formatted}</pre>`;
+        }
+      } catch (error) {
+        resultContainer.innerHTML = `<p style="color:#b91c1c">Falha ao contactar a API. Verifique se o servidor está a correr.</p><pre>${error}</pre>`;
+      } finally {
+        formButton.disabled = false;
+        formButton.textContent = 'Avaliar';
+      }
+    });
+  </script>
+</body>
+</html>
