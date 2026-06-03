@@ -61,4 +61,38 @@ public class AccessibilityController : ControllerBase
             });
         }
     }
+
+    /// <summary>
+    /// Validates the accessibility of raw HTML through the AccessMonitor API.
+    /// </summary>
+    /// <param name="request">The request containing the HTML to validate.</param>
+    /// <returns>A filtered response with only errors and warnings.</returns>
+    [HttpPost("validate/html")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
+    [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
+    public async Task<IActionResult> ValidateHtml([FromBody] ValidateHtmlRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Html))
+        {
+            return BadRequest(new { error = "The 'html' field is required." });
+        }
+
+        _logger.LogInformation("Received HTML validation request. Html length: {Length}", request.Html.Length);
+
+        try
+        {
+            var report = await _accessMonitorService.EvaluateHtmlAsync(request.Html);
+            return Ok(report);
+        }
+        catch (AccessMonitorException ex)
+        {
+            _logger.LogWarning(ex, "AccessMonitor error for HTML validation request.");
+            return StatusCode((int)ex.StatusCode, new
+            {
+                error = ex.Message
+            });
+        }
+    }
 }
