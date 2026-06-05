@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Validar HTML | AccessMonitor Wrapper</title>
+  <style>
+    body {
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: #f3f4f6;
+      color: #111827;
+      padding: 24px;
+    }
+
+    .page {
+      width: min(100%, 1120px);
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 20px 75px rgba(15, 23, 42, 0.12);
+      padding: 32px;
+      box-sizing: border-box;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.9rem, 2.5vw, 2.5rem);
+    }
+
+    .nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav a,
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 16px;
+      border: none;
+      border-radius: 12px;
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 0.95rem;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .nav a.secondary,
+    button.secondary {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    button:disabled {
+      background: #93c5fd;
+      cursor: not-allowed;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 360px;
+      resize: vertical;
+      box-sizing: border-box;
+      padding: 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      outline: none;
+      color: #0f172a;
+      background: #f8fafc;
+      font: 0.95rem/1.55 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      tab-size: 2;
+    }
+
+    textarea:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .status {
+      color: #475569;
+      font-size: 0.95rem;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .stat {
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 18px;
+      background: #f8fafc;
+      min-height: 88px;
+    }
+
+    .stat strong {
+      display: block;
+      margin-bottom: 10px;
+      color: #475569;
+    }
+
+    .stat .value {
+      font-size: 2rem;
+      color: #111827;
+    }
+
+    .results {
+      display: grid;
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .group {
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    .group header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      background: #f8fafc;
+      font-weight: 800;
+    }
+
+    .count {
+      color: #475569;
+      font-weight: 700;
+    }
+
+    .list {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .issue {
+      border: 1px solid #e5e7eb;
+      border-left: 5px solid #d97706;
+      border-radius: 12px;
+      padding: 14px;
+      background: #ffffff;
+    }
+
+    .issue.error {
+      border-left-color: #dc2626;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #334155;
+      background: #e2e8f0;
+    }
+
+    .pill.error {
+      color: #991b1b;
+      background: #fee2e2;
+    }
+
+    .pill.warning {
+      color: #92400e;
+      background: #fef3c7;
+    }
+
+    .issue h2 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+      line-height: 1.45;
+    }
+
+    .elements {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .element {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      background: #f8fafc;
+      padding: 10px;
+    }
+
+    .element p {
+      margin: 0 0 8px;
+      color: #475569;
+      font-size: 0.9rem;
+    }
+
+    code {
+      display: block;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font: 0.85rem/1.5 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .notice {
+      margin-top: 24px;
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid #bae6fd;
+      color: #0c4a6e;
+      background: #e0f2fe;
+    }
+
+    .notice.error {
+      border-color: #fecaca;
+      color: #991b1b;
+      background: #fee2e2;
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 12px;
+      }
+
+      .page {
+        padding: 20px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      textarea {
+        min-height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="topbar">
+      <h1>Validar HTML</h1>
+      <nav class="nav" aria-label="Navegação">
+        <a class="secondary" href="/ValidateUrl.html">Validar URL</a>
+      </nav>
+    </div>
+
+    <label for="htmlInput">Conteúdo HTML</label>
+    <textarea id="htmlInput" spellcheck="false" placeholder="&lt;!doctype html&gt;&#10;&lt;html lang=&quot;pt&quot;&gt;&#10;  &lt;head&gt;&#10;    &lt;title&gt;Página&lt;/title&gt;&#10;  &lt;/head&gt;&#10;  &lt;body&gt;&#10;    &lt;h1&gt;Título&lt;/h1&gt;&#10;  &lt;/body&gt;&#10;&lt;/html&gt;"></textarea>
+
+    <div class="actions">
+      <button id="validateButton">Validar</button>
+      <button id="clearButton" class="secondary" type="button">Limpar</button>
+      <span id="statusText" class="status"></span>
+    </div>
+
+    <div id="summaryArea"></div>
+    <div id="resultsArea"></div>
+  </main>
+
+  <script>
+    const htmlInput = document.getElementById('htmlInput');
+    const validateButton = document.getElementById('validateButton');
+    const clearButton = document.getElementById('clearButton');
+    const statusText = document.getElementById('statusText');
+    const summaryArea = document.getElementById('summaryArea');
+    const resultsArea = document.getElementById('resultsArea');
+
+    const autoValidateDelay = 30000;
+    let autoValidateTimer = null;
+    let activeRequest = null;
+
+    validateButton.addEventListener('click', () => validateHtml('manual'));
+
+    clearButton.addEventListener('click', () => {
+      htmlInput.value = '';
+      summaryArea.innerHTML = '';
+      resultsArea.innerHTML = '';
+      statusText.textContent = '';
+      window.clearTimeout(autoValidateTimer);
+    });
+
+    htmlInput.addEventListener('input', () => {
+      window.clearTimeout(autoValidateTimer);
+
+      if (!htmlInput.value.trim()) {
+        statusText.textContent = '';
+        return;
+      }
+
+      statusText.textContent = 'Auto em 30s';
+      autoValidateTimer = window.setTimeout(() => validateHtml('auto'), autoValidateDelay);
+    });
+
+    async function validateHtml(mode) {
+      const html = htmlInput.value.trim();
+
+      if (!html) {
+        renderError('Insira HTML antes de validar.');
+        return;
+      }
+
+      if (activeRequest) {
+        activeRequest.abort();
+      }
+
+      activeRequest = new AbortController();
+      validateButton.disabled = true;
+      validateButton.textContent = 'A validar...';
+      statusText.textContent = mode === 'auto' ? 'Validação automática...' : 'A validar...';
+
+      try {
+        const response = await fetch('/api/validate/html', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ html }),
+          signal: activeRequest.signal
+        });
+
+        const json = await response.json();
+
+        if (!response.ok) {
+          renderError(json.error || response.statusText);
+          return;
+        }
+
+        renderValidation(json);
+        statusText.textContent = `Atualizado: ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}`;
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          renderError(error.message);
+        }
+      } finally {
+        activeRequest = null;
+        validateButton.disabled = false;
+        validateButton.textContent = 'Validar';
+      }
+    }
+
+    function renderValidation(report) {
+      const errors = normalizeIssues(report.errors);
+      const warnings = normalizeIssues(report.warnings);
+
+      summaryArea.innerHTML = `
+        <div class="summary">
+          <div class="stat">
+            <strong>Erros</strong>
+            <div class="value">${errors.length}</div>
+          </div>
+          <div class="stat">
+            <strong>Warnings</strong>
+            <div class="value">${warnings.length}</div>
+          </div>
+        </div>
+      `;
+
+      if (!errors.length && !warnings.length) {
+        resultsArea.innerHTML = '<div class="notice">Sem erros ou warnings neste HTML.</div>';
+        return;
+      }
+
+      resultsArea.innerHTML = `
+        <div class="results">
+          ${renderGroup('Erros', errors, 'error')}
+          ${renderGroup('Warnings', warnings, 'warning')}
+        </div>
+      `;
+    }
+
+    function normalizeIssues(value) {
+      if (Array.isArray(value)) {
+        return value;
+      }
+
+      if (value && typeof value === 'object') {
+        return Object.values(value).flatMap(item => Array.isArray(item) ? item : [item]);
+      }
+
+      return [];
+    }
+
+    function renderGroup(title, issues, type) {
+      return `
+        <section class="group">
+          <header>
+            <span>${title}</span>
+            <span class="count">${issues.length}</span>
+          </header>
+          <div class="list">
+            ${issues.length
+              ? issues.map(issue => renderIssue(issue, type)).join('')
+              : '<div class="notice">Nada a mostrar.</div>'}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderIssue(issue, type) {
+      const criterion = issue.criterion || issue.rule || issue.test || 'critério';
+      const verdict = issue.verdict || issue.result || type;
+      const resultCode = issue.resultCode || issue.code || '';
+      const description = issue.description || issue.message || 'Sem descrição.';
+
+      return `
+        <article class="issue ${type}">
+          <div class="meta">
+            <span class="pill ${type}">${escapeHtml(verdict)}</span>
+            <span class="pill">${escapeHtml(criterion)}</span>
+            ${resultCode ? `<span class="pill">${escapeHtml(resultCode)}</span>` : ''}
+          </div>
+          <h2>${escapeHtml(description)}</h2>
+          ${renderElements(issue.elements)}
+        </article>
+      `;
+    }
+
+    function renderElements(elements) {
+      if (!Array.isArray(elements) || !elements.length) {
+        return '<div class="elements"><div class="element"><p>Sem elemento HTML associado.</p></div></div>';
+      }
+
+      const visibleElements = elements.slice(0, 8);
+
+      return `
+        <div class="elements">
+          ${visibleElements.map((element, index) => `
+            <div class="element">
+              <p>Elemento ${index + 1}${element.pointer ? ` · ${escapeHtml(element.pointer)}` : ''}</p>
+              ${element.accessibleName ? `<p>Nome acessível: ${escapeHtml(element.accessibleName)}</p>` : ''}
+              ${element.htmlCode ? `<code>${escapeHtml(element.htmlCode)}</code>` : ''}
+            </div>
+          `).join('')}
+          ${elements.length > visibleElements.length
+            ? `<div class="element"><p>Mais ${elements.length - visibleElements.length} elemento(s).</p></div>`
+            : ''}
+        </div>
+      `;
+    }
+
+    function renderError(message) {
+      summaryArea.innerHTML = '';
+      resultsArea.innerHTML = `<div class="notice error">${escapeHtml(message)}</div>`;
+      statusText.textContent = '';
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+  </script>
+</body>
+</html>

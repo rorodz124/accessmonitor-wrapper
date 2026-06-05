@@ -431,28 +431,141 @@ public class AccessMonitorService
         if (root.ValueKind != JsonValueKind.Object)
             return root;
 
-        var filtered = new JsonObject();
+        var errors = new JsonArray();
+        var warnings = new JsonArray();
 
-        // Try top-level errors/warnings
-        if (root.TryGetProperty("errors", out var errors))
-            filtered["errors"] = JsonNode.Parse(errors.GetRawText());
+        AddNamedIssues(root, "errors", errors);
+        AddNamedIssues(root, "warnings", warnings);
 
-        if (root.TryGetProperty("warnings", out var warnings))
-            filtered["warnings"] = JsonNode.Parse(warnings.GetRawText());
-
-        // Also check nested 'data'
         if (root.TryGetProperty("data", out var data) && data.ValueKind == JsonValueKind.Object)
         {
-            if (data.TryGetProperty("errors", out var dataErrors))
-                filtered["errors"] = JsonNode.Parse(dataErrors.GetRawText());
+            AddNamedIssues(data, "errors", errors);
+            AddNamedIssues(data, "warnings", warnings);
 
-            if (data.TryGetProperty("warnings", out var dataWarnings))
-                filtered["warnings"] = JsonNode.Parse(dataWarnings.GetRawText());
+            if (data.TryGetProperty("data", out var nestedData) && nestedData.ValueKind == JsonValueKind.Object)
+            {
+                AddNamedIssues(nestedData, "errors", errors);
+                AddNamedIssues(nestedData, "warnings", warnings);
+            }
         }
 
-        return filtered.Count > 0
-            ? JsonDocument.Parse(filtered.ToJsonString()).RootElement.Clone()
-            : root;
+        ExtractNodeIssues(root, errors, warnings);
+
+        var filtered = new JsonObject
+        {
+            ["errors"] = errors,
+            ["warnings"] = warnings,
+            ["summary"] = new JsonObject
+            {
+                ["errors"] = errors.Count,
+                ["warnings"] = warnings.Count
+            }
+        };
+
+        return JsonDocument.Parse(filtered.ToJsonString()).RootElement.Clone();
+    }
+
+    private static void AddNamedIssues(JsonElement source, string propertyName, JsonArray target)
+    {
+        if (!source.TryGetProperty(propertyName, out var value))
+            return;
+
+        if (value.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var item in value.EnumerateArray())
+                target.Add(JsonNode.Parse(item.GetRawText()));
+        }
+        else if (value.ValueKind == JsonValueKind.Object)
+        {
+            target.Add(JsonNode.Parse(value.GetRawText()));
+        }
+    }
+
+    private static void ExtractNodeIssues(JsonElement root, JsonArray errors, JsonArray warnings)
+    {
+        foreach (var nodes in FindNodesObjects(root))
+        {
+            foreach (var criterion in nodes.EnumerateObject())
+            {
+                if (criterion.Value.ValueKind != JsonValueKind.Array)
+                    continue;
+
+                foreach (var check in criterion.Value.EnumerateArray())
+                {
+                    if (check.ValueKind != JsonValueKind.Object)
+                        continue;
+
+                    var verdict = GetStringProperty(check, "verdict")
+                        ?? GetStringProperty(check, "result")
+                        ?? GetStringProperty(check, "status")
+                        ?? GetStringProperty(check, "outcome");
+
+                    var issueType = NormalizeIssueType(verdict);
+                    if (issueType == null)
+                        continue;
+
+                    var issue = new JsonObject
+                    {
+                        ["criterion"] = criterion.Name,
+                        ["verdict"] = verdict,
+                        ["resultCode"] = GetStringProperty(check, "resultCode") ?? GetStringProperty(check, "code"),
+                        ["description"] = GetStringProperty(check, "description") ?? GetStringProperty(check, "message"),
+                        ["elements"] = check.TryGetProperty("elements", out var elements)
+                            ? JsonNode.Parse(elements.GetRawText())
+                            : new JsonArray(),
+                        ["attributes"] = check.TryGetProperty("attributes", out var attributes)
+                            ? JsonNode.Parse(attributes.GetRawText())
+                            : new JsonArray()
+                    };
+
+                    if (issueType == "error")
+                        errors.Add(issue);
+                    else
+                        warnings.Add(issue);
+                }
+            }
+        }
+    }
+
+    private static IEnumerable<JsonElement> FindNodesObjects(JsonElement element)
+    {
+        if (element.ValueKind != JsonValueKind.Object)
+            yield break;
+
+        if (element.TryGetProperty("nodes", out var nodes) && nodes.ValueKind == JsonValueKind.Object)
+            yield return nodes;
+
+        foreach (var prop in element.EnumerateObject())
+        {
+            if (prop.Name == "pagecode")
+                continue;
+
+            if (prop.Value.ValueKind == JsonValueKind.Object)
+            {
+                foreach (var found in FindNodesObjects(prop.Value))
+                    yield return found;
+            }
+        }
+    }
+
+    private static string? NormalizeIssueType(string? verdict)
+    {
+        var normalized = verdict?.Trim().ToLowerInvariant();
+
+        if (normalized is "failed" or "fail" or "failure" or "error" or "errors" or "false")
+            return "error";
+
+        if (normalized is "warning" or "warnings" or "warn")
+            return "warning";
+
+        return null;
+    }
+
+    private static string? GetStringProperty(JsonElement element, string propertyName)
+    {
+        return element.TryGetProperty(propertyName, out var value) && value.ValueKind == JsonValueKind.String
+            ? value.GetString()
+            : null;
     }
 }
 

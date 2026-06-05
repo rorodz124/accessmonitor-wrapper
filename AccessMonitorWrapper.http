@@ -24,4 +24,20 @@ Content-Type: application/json
   "url": ""
 }
 
+### Validate raw HTML
+POST {{AccessMonitorWrapper_HostAddress}}/api/validate/html
+Content-Type: application/json
+
+{
+  "html": "<!doctype html><html lang=\"pt\"><head><title>Teste</title></head><body><h1>Teste</h1><img src=\"foto.jpg\"></body></html>"
+}
+
+### Validate with empty HTML (should return 400)
+POST {{AccessMonitorWrapper_HostAddress}}/api/validate/html
+Content-Type: application/json
+
+{
+  "html": ""
+}
+
 ###

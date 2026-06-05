@@ -61,14 +61,26 @@
       align-items: center;
     }
 
-    button {
+    button,
+    .link-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      box-sizing: border-box;
       padding: 14px 18px;
       border: none;
       border-radius: 14px;
       background: #2563eb;
       color: white;
       font-size: 1rem;
+      text-decoration: none;
       cursor: pointer;
+    }
+
+    .link-button.secondary {
+      background: #e2e8f0;
+      color: #0f172a;
     }
 
     button:disabled {
@@ -128,15 +140,146 @@
     .panel .content {
       display: none;
       padding: 20px;
-      background: #0f172a;
-      color: #e2e8f0;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      white-space: pre-wrap;
-      word-break: break-word;
+      background: #ffffff;
+      color: #111827;
     }
 
     .panel .content.visible {
       display: block;
+    }
+
+    .report-layout {
+      display: grid;
+      gap: 18px;
+    }
+
+    .report-group {
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    .report-group summary {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      cursor: pointer;
+      list-style: none;
+      font-weight: 700;
+      color: #0f172a;
+      background: #f8fafc;
+    }
+
+    .report-group summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .report-count {
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .report-list {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .report-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 14px;
+      background: #ffffff;
+    }
+
+    .report-item.failed {
+      border-left: 5px solid #dc2626;
+    }
+
+    .report-item.warning {
+      border-left: 5px solid #d97706;
+    }
+
+    .report-item.passed {
+      border-left: 5px solid #16a34a;
+    }
+
+    .report-item h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+
+    .report-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #334155;
+      background: #e2e8f0;
+    }
+
+    .pill.failed {
+      color: #991b1b;
+      background: #fee2e2;
+    }
+
+    .pill.warning {
+      color: #92400e;
+      background: #fef3c7;
+    }
+
+    .pill.passed {
+      color: #166534;
+      background: #dcfce7;
+    }
+
+    .element-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .element-card {
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 10px;
+    }
+
+    .element-card code,
+    .raw-json {
+      display: block;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .element-pointer {
+      margin: 8px 0 0;
+      color: #475569;
+      font-size: 0.85rem;
+    }
+
+    .raw-json {
+      max-height: 520px;
+      margin: 0;
+      padding: 16px;
+      border-radius: 12px;
+      color: #e2e8f0;
+      background: #0f172a;
     }
 
     .notice {
@@ -159,6 +302,7 @@
     <div class="actions">
       <button id="submitButton">Validar</button>
       <button id="toggleReportButton" type="button" disabled>Mostrar relatório completo</button>
+      <a class="link-button secondary" href="/ValidateHtml.html">Validar HTML</a>
     </div>
 
     <div id="resultArea"></div>
@@ -342,7 +486,151 @@
     }
 
     function renderReport(report) {
-      reportContent.textContent = JSON.stringify(report, null, 2);
+      const items = extractReportItems(report);
+      const groups = {
+        failed: {
+          title: 'Erros',
+          empty: 'Nenhum erro encontrado no relatório.',
+          items: items.filter(item => item.type === 'failed')
+        },
+        warning: {
+          title: 'Warnings',
+          empty: 'Nenhum warning encontrado no relatório.',
+          items: items.filter(item => item.type === 'warning')
+        },
+        passed: {
+          title: 'Passaram',
+          empty: 'Nenhum acerto encontrado no relatório.',
+          items: items.filter(item => item.type === 'passed')
+        }
+      };
+
+      reportContent.innerHTML = `
+        <div class="report-layout">
+          ${Object.entries(groups).map(([type, group]) => renderReportGroup(type, group)).join('')}
+          <details class="report-group">
+            <summary>
+              <span>JSON técnico</span>
+              <span class="report-count">relatório bruto</span>
+            </summary>
+            <pre class="raw-json">${escapeHtml(JSON.stringify(report, null, 2))}</pre>
+          </details>
+        </div>
+      `;
+    }
+
+    function extractReportItems(report) {
+      const roots = [
+        report,
+        report.data,
+        report.data?.data,
+        report.rawResponse,
+        report.rawResponse?.data,
+        report.rawResponse?.data?.data
+      ].filter(Boolean);
+
+      const nodesRoot = roots.map(root => root.nodes).find(Boolean);
+      if (!nodesRoot || typeof nodesRoot !== 'object') {
+        return [];
+      }
+
+      return Object.entries(nodesRoot).flatMap(([criterion, value]) => {
+        const checks = Array.isArray(value) ? value : [value];
+        return checks
+          .filter(check => check && typeof check === 'object')
+          .map(check => ({
+            criterion,
+            verdict: check.verdict || check.result || check.status || check.outcome || 'unknown',
+            type: normalizeVerdict(check.verdict || check.result || check.status || check.outcome),
+            resultCode: check.resultCode || check.code || '',
+            description: check.description || check.message || 'Sem descrição.',
+            elements: Array.isArray(check.elements) ? check.elements : [],
+            attributes: Array.isArray(check.attributes) ? check.attributes : []
+          }));
+      });
+    }
+
+    function normalizeVerdict(value) {
+      const verdict = String(value || '').trim().toLowerCase();
+
+      if (['failed', 'fail', 'failure', 'error', 'errors', 'false'].includes(verdict)) {
+        return 'failed';
+      }
+
+      if (['warning', 'warnings', 'warn'].includes(verdict)) {
+        return 'warning';
+      }
+
+      if (['passed', 'pass', 'success', 'successful', 'ok', 'true'].includes(verdict)) {
+        return 'passed';
+      }
+
+      return 'warning';
+    }
+
+    function renderReportGroup(type, group) {
+      const open = type !== 'passed' || group.items.length === 0 ? ' open' : '';
+
+      return `
+        <details class="report-group"${open}>
+          <summary>
+            <span>${group.title}</span>
+            <span class="report-count">${group.items.length}</span>
+          </summary>
+          <div class="report-list">
+            ${group.items.length
+              ? group.items.map(item => renderReportItem(item)).join('')
+              : `<div class="notice">${group.empty}</div>`}
+          </div>
+        </details>
+      `;
+    }
+
+    function renderReportItem(item) {
+      return `
+        <article class="report-item ${item.type}">
+          <div class="report-meta">
+            <span class="pill ${item.type}">${escapeHtml(item.verdict)}</span>
+            <span class="pill">${escapeHtml(item.criterion)}</span>
+            ${item.resultCode ? `<span class="pill">${escapeHtml(item.resultCode)}</span>` : ''}
+          </div>
+          <h3>${escapeHtml(item.description)}</h3>
+          ${renderElements(item)}
+        </article>
+      `;
+    }
+
+    function renderElements(item) {
+      const elements = item.elements.slice(0, 8);
+
+      if (!elements.length) {
+        return '<p class="element-pointer">Sem elemento HTML associado.</p>';
+      }
+
+      return `
+        <div class="element-list">
+          ${elements.map((element, index) => `
+            <div class="element-card">
+              <strong>Elemento ${index + 1}</strong>
+              ${element.accessibleName ? `<p class="element-pointer">Nome acessível: ${escapeHtml(element.accessibleName)}</p>` : ''}
+              ${element.pointer ? `<p class="element-pointer">Localização: ${escapeHtml(element.pointer)}</p>` : ''}
+              ${element.htmlCode ? `<code>${escapeHtml(element.htmlCode)}</code>` : ''}
+            </div>
+          `).join('')}
+          ${item.elements.length > elements.length
+            ? `<p class="element-pointer">Mais ${item.elements.length - elements.length} elemento(s) neste critério.</p>`
+            : ''}
+        </div>
+      `;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
     }
 
     function getMetric(sources, options) {

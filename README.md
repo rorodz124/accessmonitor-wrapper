@@ -77,9 +77,11 @@ Content-Type: application/json
 ## Frontend
 O projeto inclui duas páginas HTML estáticas em `wwwroot/`:
 
-### validate-url.html — Validação por URL
+### ValidateUrl.html — Validação por URL
 
-Acessível em `http://localhost:5296/validate-url.html`
+Acessível em `http://localhost:5296/ValidateUrl.html`
+
+O caminho antigo `http://localhost:5296/validate-url.html` continua disponível por compatibilidade.
 
 - Campo para inserir um URL
 - Botão para submeter
@@ -88,11 +90,11 @@ Acessível em `http://localhost:5296/validate-url.html`
   - **Passed** (critérios que passaram)
   - **Warnings** (avisos)
   - **Failed** (erros críticos)
-- Botão "Ver relatório completo" que expande o relatório JSON detalhado
+- Botão "Mostrar relatório completo" que apresenta erros, warnings, acertos e o JSON técnico
 
-### validate-html.html — Validação por HTML *(a criar)*
+### ValidateHtml.html — Validação por HTML
 
-Acessível em `http://localhost:5296/validate-html.html`
+Acessível em `http://localhost:5296/ValidateHtml.html`
 
 - Campo de texto rico (suporta HTML, tabelas, código, etc.)
 - **Validação automática a cada 30 segundos** enquanto a pessoa edita — chama `POST /api/validate/html` automaticamente e atualiza os alertas sem interromper a edição
@@ -117,12 +119,12 @@ AccessMonitorWrapper/
 ├── appsettings.json                  # Configuração base
 ├── appsettings.Development.json      # Configuração de desenvolvimento
 └── wwwroot/
-    ├── validate-url.html             # Página de validação por URL ✅
-    └── validate-html.html            # Página de validação por HTML ← a criar
+    ├── ValidateUrl.html              # Página de validação por URL
+    ├── validate-url.html             # Alias de compatibilidade
+    └── ValidateHtml.html             # Página de validação por HTML
 ```
 
 ## O que falta implementar
-- [ ] `wwwroot/validate-html.html` — página com editor e auto-validação a cada 30 segundos
 - [ ] Remover `wwwroot/index.html`
 ---
 
@@ -154,8 +156,8 @@ Em desenvolvimento, o Swagger UI está em `http://localhost:5296/swagger`.
 
 ### 4. Abrir as páginas no browser
 
-- Validação por URL: `http://localhost:5296/validate-url.html`
-- Validação por HTML: `http://localhost:5296/validate-html.html` *(quando criada)*
+- Validação por URL: `http://localhost:5296/ValidateUrl.html`
+- Validação por HTML: `http://localhost:5296/ValidateHtml.html`
 
 ---
 
