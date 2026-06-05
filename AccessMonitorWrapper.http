@@ -1,4 +1,4 @@
-@AccessMonitorWrapper_HostAddress = http://localhost:8080
+@AccessMonitorWrapper_HostAddress = http://localhost:5296
 
 ### Validate a URL
 POST {{AccessMonitorWrapper_HostAddress}}/api/validate

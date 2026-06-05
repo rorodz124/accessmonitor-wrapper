@@ -19,7 +19,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "5296:5296"
     environment:
       - AccessMonitor__BaseUrl=http://accessmonitor:3000
       - AccessMonitor__Referer=http://localhost:3000
