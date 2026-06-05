@@ -3,7 +3,6 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add controllers
 builder.Services.AddControllers();
 
 // OpenAPI / Swagger
@@ -34,7 +33,6 @@ builder.Services.AddHttpClient<AccessMonitorService>((sp, client) =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
-app.UseDefaultFiles();
 app.UseStaticFiles();
 
 if (app.Environment.IsDevelopment())

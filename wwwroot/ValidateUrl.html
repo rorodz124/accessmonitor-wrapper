@@ -152,7 +152,6 @@
 <body>
   <main class="page">
     <h1>Validar página por URL</h1>
-    <p>Submeta um URL e veja um resumo rápido do relatório de acessibilidade do AccessMonitor.</p>
 
     <label for="urlInput">URL da página</label>
     <input id="urlInput" type="text" placeholder="https://example.com" autocomplete="url" />
@@ -169,10 +168,6 @@
         <h2>Relatório completo</h2>
       </header>
       <div class="content" id="reportContent"></div>
-    </div>
-
-    <div class="notice">
-      Nota: este endpoint devolve o relatório completo do AccessMonitor. A página HTML usa o resultado para criar um resumo rápido.
     </div>
   </main>
 
@@ -242,12 +237,96 @@
     });
 
     function renderSummary(report) {
-      const data = report.data || report;
+      const rawReport = report.rawResponse || report;
+      const sources = [
+        report,
+        report.data,
+        report.data?.data,
+        rawReport,
+        rawReport.data,
+        rawReport.data?.data
+      ].filter(Boolean);
+
       const summary = {
-        Score: getValue(data, ['score', 'result', 'statistics', 'globalScore']),
-        Passed: getValue(data, ['passed', 'metrics.passed', 'statistics.passed']),
-        Warnings: getValue(data, ['warnings', 'metrics.warnings', 'statistics.warnings']),
-        Failed: getValue(data, ['failed', 'metrics.failed', 'statistics.failed'])
+        Score: getValue(sources, [
+          'score',
+          'result',
+          'statistics.globalScore',
+          'globalScore',
+          'resultGrade',
+          'data.score',
+          'data.result',
+          'data.statistics.globalScore',
+          'data.globalScore',
+          'data.data.score',
+          'data.data.result',
+          'data.data.statistics.globalScore',
+          'data.data.globalScore',
+          'rawResponse.score',
+          'rawResponse.result',
+          'rawResponse.data.score',
+          'rawResponse.data.result',
+          'rawResponse.data.globalScore',
+          'rawResponse.data.data.score',
+          'rawResponse.data.data.result',
+          'rawResponse.data.data.globalScore'
+        ]),
+        Passed: getMetric(sources, {
+          paths: [
+            'passed',
+            'metrics.passed',
+            'statistics.passed',
+            'assertions_passed',
+            'data.passed',
+            'data.assertions_passed',
+            'data.data.passed',
+            'data.data.assertions_passed'
+          ],
+          keys: ['passed', 'pass', 'success', 'successful', 'assertionspassed', 'totalpassed'],
+          results: ['passed', 'pass', 'success', 'successful', 'ok', 'true']
+        }),
+        Warnings: getMetric(sources, {
+          paths: [
+            'warnings',
+            'warning',
+            'metrics.warnings',
+            'statistics.warnings',
+            'assertions_warnings',
+            'data.warnings',
+            'data.warning',
+            'data.assertions_warnings',
+            'data.data.warnings',
+            'data.data.warning',
+            'data.data.assertions_warnings'
+          ],
+          keys: ['warnings', 'warning', 'warn', 'assertionswarnings', 'totalwarnings'],
+          results: ['warning', 'warnings', 'warn']
+        }),
+        Failed: getMetric(sources, {
+          paths: [
+            'failed',
+            'failures',
+            'errors',
+            'error',
+            'metrics.failed',
+            'metrics.errors',
+            'statistics.failed',
+            'statistics.errors',
+            'assertions_failed',
+            'data.failed',
+            'data.failures',
+            'data.errors',
+            'data.error',
+            'data.assertions_failed',
+            'data.data.failed',
+            'data.data.failures',
+            'data.data.errors',
+            'data.data.error',
+            'data.data.assertions_failed'
+          ],
+          keys: ['failed', 'failures', 'errors', 'error', 'fail', 'assertionsfailed', 'totalfailed', 'totalerrors'],
+          results: ['failed', 'fail', 'failure', 'error', 'errors', 'false']
+        })
       };
 
       resultArea.innerHTML = `
@@ -266,11 +345,36 @@
       reportContent.textContent = JSON.stringify(report, null, 2);
     }
 
-    function getValue(source, paths) {
-      for (const path of paths) {
-        const value = getPathValue(source, path);
-        if (value !== undefined && value !== null) {
-          return value;
+    function getMetric(sources, options) {
+      const directValue = getValue(sources, options.paths);
+      if (directValue !== null) {
+        return normalizeCount(directValue);
+      }
+
+      for (const source of sources) {
+        const valueByKey = findByKey(source, options.keys);
+        if (valueByKey !== null) {
+          return valueByKey;
+        }
+      }
+
+      for (const source of sources) {
+        const count = countByResult(source, options.results);
+        if (count > 0) {
+          return count;
+        }
+      }
+
+      return null;
+    }
+
+    function getValue(sources, paths) {
+      for (const source of sources) {
+        for (const path of paths) {
+          const value = getPathValue(source, path);
+          if (value !== undefined && value !== null) {
+            return value;
+          }
         }
       }
       return null;
@@ -284,6 +388,106 @@
         return undefined;
       }, obj);
     }
+
+    function findByKey(value, acceptedKeys, visited = new Set()) {
+      if (!value || typeof value !== 'object' || visited.has(value)) {
+        return null;
+      }
+
+      visited.add(value);
+
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          const found = findByKey(item, acceptedKeys, visited);
+          if (found !== null) {
+            return found;
+          }
+        }
+        return null;
+      }
+
+      for (const [key, child] of Object.entries(value)) {
+        if (key === 'pagecode') {
+          continue;
+        }
+
+        if (acceptedKeys.includes(normalizeKey(key))) {
+          const normalized = normalizeCount(child);
+          if (normalized !== null) {
+            return normalized;
+          }
+        }
+
+        const found = findByKey(child, acceptedKeys, visited);
+        if (found !== null) {
+          return found;
+        }
+      }
+
+      return null;
+    }
+
+    function normalizeCount(value) {
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        return value;
+      }
+
+      if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value))) {
+        return Number(value);
+      }
+
+      if (Array.isArray(value)) {
+        return value.length;
+      }
+
+      return null;
+    }
+
+    function countByResult(value, acceptedResults, visited = new Set()) {
+      if (!value || typeof value !== 'object' || visited.has(value)) {
+        return 0;
+      }
+
+      visited.add(value);
+
+      if (Array.isArray(value)) {
+        return value.reduce((total, item) => total + countByResult(item, acceptedResults, visited), 0);
+      }
+
+      let count = 0;
+
+      for (const [key, child] of Object.entries(value)) {
+        if (key === 'pagecode') {
+          continue;
+        }
+
+        const normalizedKey = normalizeKey(key);
+        if (['result', 'status', 'outcome', 'verdict'].includes(normalizedKey)) {
+          const normalizedValue = String(child).trim().toLowerCase();
+          if (acceptedResults.includes(normalizedValue)) {
+            count++;
+          }
+        }
+
+        count += countByResult(child, acceptedResults, visited);
+      }
+
+      return count;
+    }
+
+    function normalizeKey(key) {
+      return key.toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+
+    // Auto-focus and load URL from query parameter if provided
+    window.addEventListener('load', () => {
+      const params = new URLSearchParams(window.location.search);
+      const url = params.get('url');
+      if (url) {
+        urlInput.value = url;
+        submitButton.click();
+      }
+    });
   </script>
 </body>
 </html>

@@ -79,7 +79,7 @@ O projeto inclui duas páginas HTML estáticas em `wwwroot/`:
 
 ### validate-url.html — Validação por URL
 
-Acessível em `http://localhost:5296/validate-url.html` (desenvolvimento) ou `http://localhost:8080/validate-url.html` (Docker).
+Acessível em `http://localhost:5296/validate-url.html`
 
 - Campo para inserir um URL
 - Botão para submeter
@@ -92,7 +92,7 @@ Acessível em `http://localhost:5296/validate-url.html` (desenvolvimento) ou `ht
 
 ### validate-html.html — Validação por HTML *(a criar)*
 
-Acessível em `http://localhost:5296/validate-html.html` (desenvolvimento) ou `http://localhost:8080/validate-html.html` (Docker).
+Acessível em `http://localhost:5296/validate-html.html`
 
 - Campo de texto rico (suporta HTML, tabelas, código, etc.)
 - **Validação automática a cada 30 segundos** enquanto a pessoa edita — chama `POST /api/validate/html` automaticamente e atualiza os alertas sem interromper a edição
@@ -112,7 +112,7 @@ AccessMonitorWrapper/
 │   ├── ValidateRequest.cs            # Modelo do pedido por URL { url }
 │   └── ValidateHtmlRequest.cs        # Modelo do pedido por HTML { html }
 ├── Program.cs                        # Configuração e DI
-├── Dockerfile                        # Build multi-stage da API (porta 8080)
+├── Dockerfile                        # Build multi-stage da API (porta 3000)
 ├── docker-compose.yml                # Orquestração dos dois serviços
 ├── appsettings.json                  # Configuração base
 ├── appsettings.Development.json      # Configuração de desenvolvimento
@@ -133,15 +133,11 @@ AccessMonitorWrapper/
 ---
 
 ## Como correr — VS Code
-### 1. Primeira vez — configurar o AccessMonitor
-Na primeira vez de correr o projeto, é preciso arrancar o contentor do AccessMonitor e configurá-lo para iniciar automaticamente:
-
+### 1. Configurar access monitor
 ```powershell
 cd C:\Projetos\accessmonitor-docker
 docker run --env-file .env -p 3000:3000 accessmonitor-docker
 ```
-
-Depois, noutro terminal, copia o ID do contentor e activa o restart automático:
 
 ```powershell
 docker ps
@@ -155,12 +151,6 @@ dotnet run
 ```
 
 Em desenvolvimento, o Swagger UI está em `http://localhost:5296/swagger`.
-
-### 3. Confirmar que o AccessMonitor está vivo (opcional)
-
-```powershell
-Invoke-RestMethod "http://localhost:3000/health"
-```
 
 ### 4. Abrir as páginas no browser
 
@@ -190,5 +180,5 @@ AccessMonitor__Referer=http://localhost:3000
 - O URL enviado ao AccessMonitor é codificado em **Base64** no path: `GET /amp/eval/{urlBase64}`.
 - O timeout do HttpClient está definido para **120 segundos** (a avaliação pode demorar).
 - Na validação por HTML, a API filtra a resposta e devolve apenas os itens com erros ou avisos — os critérios que passaram são descartados.
-- A Wrapper API corre na porta `5296` em desenvolvimento (`dotnet run`) e na porta `8080` em Docker.
+- A Wrapper API corre na porta `5296` em desenvolvimento (`dotnet run`) e na porta `3000` em Docker.
 - A auto-validação no editor HTML (quando implementada) dispara a cada **30 segundos** desde a última alteração, sem bloquear a edição.
