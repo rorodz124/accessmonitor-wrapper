@@ -20,10 +20,9 @@ public class AccessibilityController : ControllerBase
     }
 
     /// <summary>
-    /// Validates the accessibility of a web page.
+    /// Valida a acessibilidade de uma página web por URL.
+    /// Devolve o relatório completo do AccessMonitor (sem o campo pagecode).
     /// </summary>
-    /// <param name="request">The request containing the URL to validate.</param>
-    /// <returns>The accessibility report from AccessMonitor.</returns>
     [HttpPost("validate")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -31,13 +30,9 @@ public class AccessibilityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
     public async Task<IActionResult> Validate([FromBody] ValidateRequest request)
     {
-        // Validate that a URL was provided
         if (string.IsNullOrWhiteSpace(request.Url))
-        {
             return BadRequest(new { error = "The 'url' field is required." });
-        }
 
-        // Validate that the URL is well-formed
         if (!Uri.TryCreate(request.Url, UriKind.Absolute, out var uri)
             || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
         {
@@ -54,19 +49,14 @@ public class AccessibilityController : ControllerBase
         catch (AccessMonitorException ex)
         {
             _logger.LogWarning(ex, "AccessMonitor error for URL: {Url}", request.Url);
-
-            return StatusCode((int)ex.StatusCode, new
-            {
-                error = ex.Message
-            });
+            return StatusCode((int)ex.StatusCode, new { error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Validates the accessibility of raw HTML through the AccessMonitor API.
+    /// Valida a acessibilidade de HTML em bruto.
+    /// Devolve a resposta do AccessMonitor tal como está.
     /// </summary>
-    /// <param name="request">The request containing the HTML to validate.</param>
-    /// <returns>A filtered response with only errors and warnings.</returns>
     [HttpPost("validate/html")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -75,9 +65,7 @@ public class AccessibilityController : ControllerBase
     public async Task<IActionResult> ValidateHtml([FromBody] ValidateHtmlRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Html))
-        {
             return BadRequest(new { error = "The 'html' field is required." });
-        }
 
         _logger.LogInformation("Received HTML validation request. Html length: {Length}", request.Html.Length);
 
@@ -89,10 +77,7 @@ public class AccessibilityController : ControllerBase
         catch (AccessMonitorException ex)
         {
             _logger.LogWarning(ex, "AccessMonitor error for HTML validation request.");
-            return StatusCode((int)ex.StatusCode, new
-            {
-                error = ex.Message
-            });
+            return StatusCode((int)ex.StatusCode, new { error = ex.Message });
         }
     }
 }

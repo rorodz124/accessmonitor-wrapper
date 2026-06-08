@@ -27,7 +27,7 @@ builder.Services.AddHttpClient<AccessMonitorService>((sp, client) =>
 
     client.BaseAddress = new Uri(baseUrl);
     client.DefaultRequestHeaders.Add("Referer", referer);
-    client.Timeout = TimeSpan.FromSeconds(120);
+    client.Timeout = TimeSpan.FromSeconds(180);
 });
 
 var app = builder.Build();
