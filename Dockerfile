@@ -12,8 +12,8 @@ WORKDIR /app
 
 COPY --from=build /app/publish .
 
-ENV ASPNETCORE_URLS=http://+:5296
+ENV ASPNETCORE_URLS=http://+:5297
 
-EXPOSE 5296
+EXPOSE 5297
 
 ENTRYPOINT ["dotnet", "AccessMonitorWrapper.dll"]

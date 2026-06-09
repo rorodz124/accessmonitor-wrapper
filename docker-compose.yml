@@ -44,11 +44,11 @@ services:
       dockerfile: Dockerfile
     container_name: wrapper-api
     ports:
-      - "5296:5296"
+      - "5297:5297"
     environment:
       - AccessMonitor__BaseUrl=http://accessmonitor-backend:3000
       - AccessMonitor__Referer=http://localhost:3000
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       accessmonitor-backend:
         condition: service_healthy
