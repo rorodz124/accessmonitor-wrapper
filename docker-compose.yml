@@ -1,29 +1,60 @@
 services:
   accessmonitor:
-    build:
-      context: ../accessmonitor-docker
-      dockerfile: Dockerfile
-    env_file:
-      - ../accessmonitor-docker/.env
+    image: acessibilidade/accessmonitor-web:1.0.1
+    container_name: accessmonitor
+    ports:
+      - "80:80"
+    environment:
+      NODE_ENV: production
+      REACT_APP_AMP_SERVER: http://localhost:3000/amp
+      REACT_APP_BASE_URL: /
+      REACT_APP_SERVER_URL: /
+      REACT_APP_API_DATA_SOURCE: remote
+    depends_on:
+      accessmonitor-backend:
+        condition: service_healthy
+    networks:
+      - access-monitor-network
+
+
+  accessmonitor-backend:
+    image: acessibilidade/accessmonitor-api:1.0.0
+    container_name: accessmonitor-backend
     ports:
       - "3000:3000"
+    environment:
+      NODE_ENV: "production"
+      REFERER: "http://localhost:3000"
+      IP_BLACKLIST_RANGES: ""
+      RATE_LIMIT_ENABLED: false
+      RATE_LIMIT_TTL: 60000
+      RATE_LIMIT_LIMIT: 10
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 15s
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1"]
+      interval: 30s
       timeout: 10s
-      retries: 5
-      start_period: 30s
+      retries: 10
+    networks:
+      - access-monitor-network
+
 
   wrapper-api:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: wrapper-api
     ports:
       - "5296:5296"
     environment:
-      - AccessMonitor__BaseUrl=http://accessmonitor:3000
+      - AccessMonitor__BaseUrl=http://accessmonitor-backend:3000
       - AccessMonitor__Referer=http://localhost:3000
       - ASPNETCORE_ENVIRONMENT=Production
     depends_on:
-      accessmonitor:
+      accessmonitor-backend:
         condition: service_healthy
+    networks:
+      - access-monitor-network
+
+networks:
+  access-monitor-network:
+    driver: bridge

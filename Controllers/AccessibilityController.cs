@@ -19,10 +19,7 @@ public class AccessibilityController : ControllerBase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Valida a acessibilidade de uma página web por URL.
-    /// Devolve o relatório completo do AccessMonitor (sem o campo pagecode).
-    /// </summary>
+
     [HttpPost("validate")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -53,10 +50,7 @@ public class AccessibilityController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Valida a acessibilidade de HTML em bruto.
-    /// Devolve a resposta do AccessMonitor tal como está.
-    /// </summary>
+
     [HttpPost("validate/html")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -5,7 +5,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-// OpenAPI / Swagger
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen(options =>
 {

@@ -8,59 +8,141 @@
     body {
       font-family: Inter, system-ui, sans-serif;
       margin: 0; min-height: 100vh;
-      background: #f3f4f6; color: #111827; padding: 24px;
+      background: #f3f4f6; color: #111827;
+      padding: 24px; box-sizing: border-box;
     }
     .page {
-      width: min(100%, 1120px); margin: 0 auto; background: #fff;
-      border-radius: 20px; box-shadow: 0 20px 75px rgba(15,23,42,.12);
+      width: min(100%, 860px); margin: 0 auto; background: #fff;
+      border-radius: 24px; box-shadow: 0 20px 75px rgba(15,23,42,.12);
       padding: 32px; box-sizing: border-box;
     }
-    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 18px; }
-    h1 { margin: 0; font-size: clamp(1.9rem, 2.5vw, 2.5rem); }
-    .nav a, button {
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; }
+    h1 { margin: 0; font-size: clamp(1.6rem, 2.5vw, 2.2rem); }
+    .link-button {
       display: inline-flex; align-items: center; justify-content: center;
-      min-height: 44px; padding: 0 16px; border: none; border-radius: 12px;
-      background: #2563eb; color: #fff; font-size: .95rem; text-decoration: none; cursor: pointer;
+      min-height: 44px; padding: 0 20px; border: none; border-radius: 14px;
+      background: #e2e8f0; color: #0f172a; font-size: 1rem; font-weight: 600;
+      text-decoration: none; cursor: pointer;
     }
-    .nav a.secondary, button.secondary { background: #e2e8f0; color: #0f172a; }
-    button:disabled { background: #93c5fd; cursor: not-allowed; }
-    label { display: block; margin-bottom: 8px; font-weight: 700; }
+
+    label { display: block; margin-bottom: 8px; font-weight: 600; }
     textarea {
-      width: 100%; min-height: 360px; resize: vertical; box-sizing: border-box;
-      padding: 16px; border: 1px solid #cbd5e1; border-radius: 14px; outline: none;
-      color: #0f172a; background: #f8fafc;
-      font: .95rem/1.55 ui-monospace, Menlo, monospace; tab-size: 2;
+      width: 100%; min-height: 280px; resize: vertical;
+      padding: 14px 16px; border: 1px solid #cbd5e1; border-radius: 14px;
+      font: .9rem/1.6 ui-monospace, Menlo, monospace; color: #0f172a;
+      outline: none; box-sizing: border-box; background: #f8fafc;
     }
-    textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.16); }
-    .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 16px; }
-    .status { color: #475569; font-size: .95rem; }
-    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-top: 24px; }
-    .stat { border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px; background: #f8fafc; min-height: 88px; }
-    .stat strong { display: block; margin-bottom: 10px; color: #475569; }
-    .stat .value { font-size: 2rem; color: #111827; }
-    .results { display: grid; gap: 18px; margin-top: 24px; }
-    .group { border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; background: #fff; }
-    .group header { display: flex; justify-content: space-between; gap: 12px; padding: 16px 18px; background: #f8fafc; font-weight: 800; }
-    .count { color: #475569; font-weight: 700; }
-    .list { display: grid; gap: 12px; padding: 14px; }
-    .issue { border: 1px solid #e5e7eb; border-left: 5px solid #d97706; border-radius: 12px; padding: 14px; background: #fff; }
-    .issue.error { border-left-color: #dc2626; }
-    .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
-    .pill { border-radius: 999px; padding: 4px 9px; font-size: .8rem; font-weight: 800; color: #334155; background: #e2e8f0; }
-    .pill.error   { color: #991b1b; background: #fee2e2; }
-    .pill.warning { color: #92400e; background: #fef3c7; }
-    .issue h2 { margin: 0 0 10px; font-size: 1rem; line-height: 1.45; }
-    .elements { display: grid; gap: 10px; margin-top: 12px; }
-    .element { border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; padding: 10px; }
-    .element p { margin: 0 0 8px; color: #475569; font-size: .9rem; }
-    code { display: block; overflow-x: auto; white-space: pre-wrap; word-break: break-word; font: .85rem/1.5 ui-monospace, Menlo, monospace; }
-    .notice { margin-top: 24px; padding: 16px; border-radius: 14px; border: 1px solid #bae6fd; color: #0c4a6e; background: #e0f2fe; }
-    .notice.error { border-color: #fecaca; color: #991b1b; background: #fee2e2; }
-    @media (max-width: 720px) {
+    textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; align-items: center; }
+    button {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: 44px; padding: 0 20px; border: none; border-radius: 14px;
+      background: #2563eb; color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer;
+    }
+    button.secondary { background: #e2e8f0; color: #0f172a; }
+    button:disabled  { background: #93c5fd; cursor: not-allowed; }
+    .status-text { font-size: .9rem; color: #64748b; margin-left: auto; }
+
+    .summary-card {
+      margin-top: 28px; border: 1px solid #e2e8f0; border-radius: 20px;
+      padding: 24px; background: #f8fafc;
+      display: flex; align-items: center; gap: 32px; flex-wrap: wrap;
+    }
+
+    .score-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0; }
+    .score-circle { position: relative; width: 120px; height: 120px; }
+    .score-circle svg { transform: rotate(-90deg); }
+    .score-circle .score-bg { fill: none; stroke: #e2e8f0; stroke-width: 10; }
+    .score-circle .score-fg { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset .8s ease; }
+    .score-text {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 800; color: #111827; line-height: 1;
+    }
+    .score-text small { font-size: .75rem; font-weight: 500; color: #64748b; margin-top: 2px; }
+
+    .summary-info { flex: 1; min-width: 200px; }
+    .summary-info h2 { margin: 0 0 12px; font-size: .85rem; color: #64748b; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { border-radius: 999px; padding: 5px 13px; font-size: .82rem; font-weight: 700; }
+    .chip-red   { background: #fee2e2; color: #991b1b; }
+    .chip-amber { background: #fef3c7; color: #92400e; }
+    .chip-slate { background: #e2e8f0; color: #334155; }
+    .chip-green { background: #dcfce7; color: #166534; }
+    .conform-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .conform-badge {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+      padding: 6px 14px; font-size: .8rem; font-weight: 700; text-align: center;
+    }
+    .conform-badge .level { display: block; font-size: .7rem; color: #64748b; font-weight: 400; margin-top: 1px; }
+    .conform-badge.has-errors { border-color: #fecaca; background: #fee2e2; color: #991b1b; }
+
+
+    .section { margin-top: 28px; }
+    .section-title {
+      font-size: 1rem; font-weight: 800; margin: 0 0 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .count-pill {
+      border-radius: 999px; padding: 2px 10px; font-size: .78rem; font-weight: 700;
+      background: #fee2e2; color: #991b1b;
+    }
+    .count-pill.warn { background: #fef3c7; color: #92400e; }
+
+    .issue-list { display: grid; gap: 10px; }
+    .issue {
+      border: 1px solid #e5e7eb; border-left: 5px solid #dc2626;
+      border-radius: 14px; overflow: hidden; background: #fff;
+    }
+    .issue.warning { border-left-color: #d97706; }
+
+    .issue-head {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 14px 16px; cursor: pointer; user-select: none;
+    }
+    .issue-head:hover { background: #f8fafc; }
+    .pill {
+      flex-shrink: 0; border-radius: 999px; padding: 3px 10px;
+      font-size: .75rem; font-weight: 700;
+    }
+    .pill.error   { background: #fee2e2; color: #991b1b; }
+    .pill.warning { background: #fef3c7; color: #92400e; }
+    .pill.crit    { background: #e2e8f0; color: #334155; }
+    .issue-desc   { flex: 1; font-size: .92rem; line-height: 1.5; padding-top: 2px; }
+    .arrow { color: #94a3b8; flex-shrink: 0; padding-top: 4px; transition: transform .2s; }
+    .arrow.open { transform: rotate(180deg); }
+
+    .issue-body { display: none; padding: 0 16px 14px; border-top: 1px solid #f1f5f9; }
+    .issue-body.open { display: block; }
+    .elem-list { display: grid; gap: 8px; margin-top: 10px; }
+    .elem {
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px;
+    }
+    .elem-ptr { font-size: .78rem; color: #64748b; margin-bottom: 5px; }
+    pre { margin: 0; font: .82rem/1.5 ui-monospace, Menlo, monospace;
+          white-space: pre-wrap; word-break: break-all; color: #0f172a; overflow-x: auto; }
+
+
+    .notice {
+      margin-top: 24px; padding: 18px 20px; border-radius: 16px;
+      font-size: .92rem; line-height: 1.5;
+    }
+    .notice-ok  { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .notice-err { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+
+    .spin {
+      width: 16px; height: 16px; border: 2.5px solid rgba(255,255,255,.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: sp .6s linear infinite; flex-shrink: 0;
+    }
+    @keyframes sp { to { transform: rotate(360deg); } }
+
+    @media (max-width: 600px) {
       body { padding: 12px; }
-      .page { padding: 20px; }
-      .topbar { align-items: flex-start; flex-direction: column; }
-      textarea { min-height: 300px; }
+      .page { padding: 20px; border-radius: 16px; }
+      .topbar { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
@@ -68,151 +150,179 @@
   <main class="page">
     <div class="topbar">
       <h1>Validar HTML</h1>
-      <nav class="nav" aria-label="Navegação">
-        <a class="secondary" href="/ValidateUrl.html">Validar URL</a>
-      </nav>
+      <a class="link-button" href="/ValidateUrl.html">Validar por URL</a>
     </div>
+
     <label for="htmlInput">Conteúdo HTML</label>
-    <textarea id="htmlInput" spellcheck="false" placeholder="&lt;!doctype html&gt;&#10;&lt;html lang=&quot;pt&quot;&gt;&#10;  &lt;head&gt;&lt;title&gt;Página&lt;/title&gt;&lt;/head&gt;&#10;  &lt;body&gt;&lt;h1&gt;Título&lt;/h1&gt;&lt;/body&gt;&#10;&lt;/html&gt;"></textarea>
+    <textarea id="htmlInput" spellcheck="false"
+      placeholder="<!doctype html>&#10;<html lang=&quot;pt&quot;>&#10;  <head><title>Página</title></head>&#10;  <body><h1>Título</h1></body>&#10;</html>"></textarea>
+
     <div class="actions">
-      <button id="validateButton">Validar</button>
-      <button id="clearButton" class="secondary" type="button">Limpar</button>
-      <span id="statusText" class="status"></span>
+      <button id="btnVerify">Verificar</button>
+      <button id="btnClear" class="secondary">Limpar</button>
+      <span class="status-text" id="statusText" aria-live="polite"></span>
     </div>
-    <div id="summaryArea"></div>
-    <div id="resultsArea"></div>
+
+    <div id="results"></div>
   </main>
 
   <script>
-    const htmlInput      = document.getElementById('htmlInput');
-    const validateButton = document.getElementById('validateButton');
-    const clearButton    = document.getElementById('clearButton');
-    const statusText     = document.getElementById('statusText');
-    const summaryArea    = document.getElementById('summaryArea');
-    const resultsArea    = document.getElementById('resultsArea');
+    const taEl = document.getElementById('htmlInput');
+    const btnV = document.getElementById('btnVerify');
+    const btnC = document.getElementById('btnClear');
+    const status = document.getElementById('statusText');
+    const results = document.getElementById('results');
+    let ac = null;
 
-    let autoTimer = null, activeRequest = null;
+    btnC.onclick = () => { taEl.value = ''; results.innerHTML = ''; status.textContent = ''; };
+    btnV.onclick = runValidation;
 
-    validateButton.addEventListener('click', () => validate('manual'));
+    async function runValidation() {
+      const html = taEl.value.trim();
+      if (!html) { notice('err', 'Insira HTML antes de verificar.'); return; }
 
-    clearButton.addEventListener('click', () => {
-      htmlInput.value = '';
-      summaryArea.innerHTML = resultsArea.innerHTML = statusText.textContent = '';
-      clearTimeout(autoTimer);
-    });
-
-    htmlInput.addEventListener('input', () => {
-      clearTimeout(autoTimer);
-      if (!htmlInput.value.trim()) { statusText.textContent = ''; return; }
-      statusText.textContent = 'Auto em 30s';
-      autoTimer = setTimeout(() => validate('auto'), 30000);
-    });
-
-    async function validate(mode) {
-      const html = htmlInput.value.trim();
-      if (!html) { renderError('Insira HTML antes de validar.'); return; }
-
-      activeRequest?.abort();
-      activeRequest = new AbortController();
-      validateButton.disabled = true;
-      validateButton.textContent = 'A validar...';
-      statusText.textContent = mode === 'auto' ? 'Validação automática...' : 'A validar...';
+      ac?.abort(); ac = new AbortController();
+      btnV.disabled = true;
+      btnV.innerHTML = '<span class="spin"></span> A verificar…';
+      results.innerHTML = '';
+      status.textContent = '';
 
       try {
         const res  = await fetch('/api/validate/html', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ html }), signal: activeRequest.signal
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ html }),
+          signal: ac.signal
         });
         const json = await res.json();
-        if (!res.ok) { renderError(json.error || res.statusText); return; }
-        renderValidation(json);
-        statusText.textContent = `Atualizado: ${new Date().toLocaleTimeString('pt-PT', { hour:'2-digit', minute:'2-digit' })}`;
-      } catch (err) {
-        if (err.name !== 'AbortError') renderError(err.message);
+        if (!res.ok) { notice('err', json.error || `Erro ${res.status}`); return; }
+        renderResults(json);
+        status.textContent = 'Atualizado: ' + new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+      } catch (e) {
+        if (e.name !== 'AbortError') notice('err', 'Não foi possível contactar o serviço. Tente novamente.');
       } finally {
-        activeRequest = null;
-        validateButton.disabled = false;
-        validateButton.textContent = 'Validar';
+        btnV.disabled = false;
+        btnV.innerHTML = 'Verificar';
+        ac = null;
       }
     }
 
-    function normalizeIssues(val) {
-      if (Array.isArray(val)) return val;
-      if (val && typeof val === 'object') return Object.values(val).flatMap(i => Array.isArray(i) ? i : [i]);
-      return [];
-    }
+    function renderResults(r) {
+      const errors   = r.errors   || [];
+      const warnings = r.warnings || [];
+      const score    = parseFloat(r.score) || 0;
+      const cA   = r.conform?.A   ?? '0';
+      const cAA  = r.conform?.AA  ?? '0';
+      const cAAA = r.conform?.AAA ?? '0';
+      const color = score >= 7 ? '#16a34a' : score >= 4 ? '#d97706' : '#dc2626';
 
-    function renderValidation(report) {
-      const errors   = normalizeIssues(report.errors);
-      const warnings = normalizeIssues(report.warnings);
+      const R = 50, circ = 2 * Math.PI * R, dash = circ * 0.75;
+      const targetOffset = -((dash - score / 10 * dash) - circ * .125);
 
-      summaryArea.innerHTML = `
-        <div class="summary">
-          <div class="stat"><strong>Erros</strong><div class="value">${errors.length}</div></div>
-          <div class="stat"><strong>Warnings</strong><div class="value">${warnings.length}</div></div>
+      let h = `
+        <div class="summary-card">
+          <div class="score-wrap">
+            <div class="score-circle">
+              <svg viewBox="0 0 120 120" width="120" height="120">
+                <circle class="score-bg" cx="60" cy="60" r="${R}"
+                  stroke-dasharray="${dash} ${circ - dash}"
+                  stroke-dashoffset="${-(circ * .125)}" />
+                <circle class="score-fg" id="gaugeArc" cx="60" cy="60" r="${R}"
+                  stroke="${color}"
+                  stroke-dasharray="${dash} ${circ - dash}"
+                  stroke-dashoffset="${dash + circ * .125}"
+                  data-target="${targetOffset}" />
+              </svg>
+              <div class="score-text">${score.toFixed(1)}<small>Pontuação</small></div>
+            </div>
+          </div>
+          <div class="summary-info">
+            <h2>Avaliação de acessibilidade</h2>
+            <div class="chips">
+              ${errors.length
+                ? `<span class="chip chip-red"> ${errors.length} erro${errors.length !== 1 ? 's' : ''}</span>`
+                : `<span class="chip chip-green">✓ Sem erros</span>`}
+              ${warnings.length ? `<span class="chip chip-amber">⚠ ${warnings.length} aviso${warnings.length !== 1 ? 's' : ''}</span>` : ''}
+            </div>
+            <div class="conform-row">
+              <div class="conform-badge ${+cA   > 0 ? 'has-errors' : ''}">
+                ${cA} erro${cA   !== '1' ? 's' : ''}<span class="level">Nível A</span>
+              </div>
+              <div class="conform-badge ${+cAA  > 0 ? 'has-errors' : ''}">
+                ${cAA} erro${cAA  !== '1' ? 's' : ''}<span class="level">Nível AA</span>
+              </div>
+              <div class="conform-badge ${+cAAA > 0 ? 'has-errors' : ''}">
+                ${cAAA} erro${cAAA !== '1' ? 's' : ''}<span class="level">Nível AAA</span>
+              </div>
+            </div>
+          </div>
         </div>`;
 
       if (!errors.length && !warnings.length) {
-        resultsArea.innerHTML = '<div class="notice">Sem erros ou warnings neste HTML.</div>';
-        return;
+        h += `<div class="notice notice-ok">✅ Nenhum problema de acessibilidade encontrado neste HTML.</div>`;
+      } else {
+        if (errors.length) {
+          h += `<div class="section">
+            <div class="section-title">Erros <span class="count-pill">${errors.length}</span></div>
+            <div class="issue-list">${errors.map((e, i) => renderIssue(e, 'error', i)).join('')}</div>
+          </div>`;
+        }
+        if (warnings.length) {
+          h += `<div class="section">
+            <div class="section-title">Avisos <span class="count-pill warn">${warnings.length}</span></div>
+            <div class="issue-list">${warnings.map((e, i) => renderIssue(e, 'warning', 1000 + i)).join('')}</div>
+          </div>`;
+        }
       }
-      resultsArea.innerHTML = `
-        <div class="results">
-          ${renderGroup('Erros', errors, 'error')}
-          ${renderGroup('Warnings', warnings, 'warning')}
-        </div>`;
+
+      results.innerHTML = h;
+
+      requestAnimationFrame(() => {
+        const arc = document.getElementById('gaugeArc');
+        if (arc) arc.style.strokeDashoffset = arc.dataset.target;
+      });
+
+      results.querySelectorAll('.issue-head').forEach(head => {
+        head.addEventListener('click', () => {
+          const body  = head.nextElementSibling;
+          const arrow = head.querySelector('.arrow');
+          if (!body) return;
+          const open = body.classList.toggle('open');
+          arrow?.classList.toggle('open', open);
+        });
+      });
     }
 
-    function renderGroup(title, issues, type) {
-      return `
-        <section class="group">
-          <header><span>${title}</span><span class="count">${issues.length}</span></header>
-          <div class="list">
-            ${issues.length ? issues.map(i => renderIssue(i, type)).join('') : '<div class="notice">Nada a mostrar.</div>'}
-          </div>
-        </section>`;
-    }
+    function renderIssue(item, type, idx) {
+      const elems = (item.elements || []).slice(0, 5);
+      const elemsHtml = elems.length ? `
+        <div class="elem-list">
+          ${elems.map(el => `
+            <div class="elem">
+              ${el.pointer  ? `<div class="elem-ptr">📍 ${x(el.pointer)}</div>` : ''}
+              ${el.htmlCode ? `<pre>${x(el.htmlCode)}</pre>` : ''}
+            </div>`).join('')}
+          ${(item.elements?.length ?? 0) > 5 ? `<p style="color:#64748b;font-size:.82rem;margin:8px 0 0">+ ${item.elements.length - 5} elemento(s) adicionais</p>` : ''}
+        </div>` : '';
 
-    function renderIssue(issue, type) {
-      const criterion   = issue.criterion || issue.rule || issue.test || 'critério';
-      const verdict     = issue.verdict   || issue.result || type;
-      const resultCode  = issue.resultCode || issue.code || '';
-      const description = issue.description || issue.message || 'Sem descrição.';
+      const hasBody = !!elemsHtml;
       return `
         <article class="issue ${type}">
-          <div class="meta">
-            <span class="pill ${type}">${esc(verdict)}</span>
-            <span class="pill">${esc(criterion)}</span>
-            ${resultCode ? `<span class="pill">${esc(resultCode)}</span>` : ''}
+          <div class="issue-head">
+            <span class="pill ${type}">${type === 'error' ? 'Erro' : 'Aviso'}</span>
+            ${item.criterion ? `<span class="pill crit">${x(item.criterion)}</span>` : ''}
+            <span class="issue-desc">${x(item.description || '(sem descrição)')}</span>
+            ${hasBody ? `<span class="arrow">▾</span>` : ''}
           </div>
-          <h2>${esc(description)}</h2>
-          ${renderElements(issue.elements)}
+          ${hasBody ? `<div class="issue-body">${elemsHtml}</div>` : ''}
         </article>`;
     }
 
-    function renderElements(elements) {
-      if (!Array.isArray(elements) || !elements.length)
-        return '<div class="elements"><div class="element"><p>Sem elemento HTML associado.</p></div></div>';
-      const visible = elements.slice(0, 8);
-      return `
-        <div class="elements">
-          ${visible.map((el, i) => `
-            <div class="element">
-              <p>Elemento ${i+1}${el.pointer ? ` · ${esc(el.pointer)}` : ''}</p>
-              ${el.accessibleName ? `<p>Nome acessível: ${esc(el.accessibleName)}</p>` : ''}
-              ${el.htmlCode ? `<code>${esc(el.htmlCode)}</code>` : ''}
-            </div>`).join('')}
-          ${elements.length > visible.length ? `<div class="element"><p>Mais ${elements.length - visible.length} elemento(s).</p></div>` : ''}
-        </div>`;
+    function notice(type, msg) {
+      results.innerHTML = `<div class="notice notice-${type === 'err' ? 'err' : 'ok'}">${x(msg)}</div>`;
     }
 
-    function renderError(msg) {
-      summaryArea.innerHTML = '';
-      resultsArea.innerHTML = `<div class="notice error">${esc(msg)}</div>`;
-      statusText.textContent = '';
-    }
-
-    const esc = v => String(v ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+    const x = v => String(v ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
   </script>
 </body>
 </html>

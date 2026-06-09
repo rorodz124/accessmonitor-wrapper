@@ -36,12 +36,10 @@
     button:disabled { background: #93c5fd; cursor: not-allowed; }
     button.secondary:disabled { background: #f1f5f9; color: #94a3b8; }
 
-    /* Sumário */
     .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px; }
     .summary-card { border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; background: #f8fafc; }
     .summary-card h2 { margin: 0 0 16px; font-size: 1rem; color: #475569; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
 
-    /* Score gauge */
     .score-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .score-circle { position: relative; width: 120px; height: 120px; }
     .score-circle svg { transform: rotate(-90deg); }
@@ -54,7 +52,6 @@
     }
     .score-text small { font-size: .75rem; font-weight: 500; color: #64748b; margin-top: 2px; }
 
-    /* Práticas */
     .practices-table { width: 100%; border-collapse: collapse; }
     .practices-table th { text-align: left; padding: 8px 12px; font-size: .8rem; color: #64748b; font-weight: 600; border-bottom: 2px solid #e2e8f0; }
     .practices-table th:not(:first-child) { text-align: center; }
@@ -72,7 +69,6 @@
     .practice-icon.failed  { background: #fee2e2; color: #dc2626; border: 2px solid #dc2626; }
     .practice-icon.total   { background: #f1f5f9; color: #475569; border: 2px solid #94a3b8; }
 
-    /* Relatório completo */
     .panel { margin-top: 24px; border-radius: 20px; border: 1px solid #e2e8f0; overflow: hidden; }
     .panel header { padding: 18px 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
     .panel header h2 { margin: 0; font-size: 1rem; }
@@ -131,12 +127,12 @@
   </main>
 
   <script>
-    const submitButton       = document.getElementById('submitButton');
+    const submitButton = document.getElementById('submitButton');
     const toggleReportButton = document.getElementById('toggleReportButton');
-    const urlInput           = document.getElementById('urlInput');
-    const resultArea         = document.getElementById('resultArea');
-    const reportPanel        = document.getElementById('reportPanel');
-    const reportContent      = document.getElementById('reportContent');
+    const urlInput = document.getElementById('urlInput');
+    const resultArea = document.getElementById('resultArea');
+    const reportPanel = document.getElementById('reportPanel');
+    const reportContent = document.getElementById('reportContent');
     let latestReport = null;
 
     submitButton.addEventListener('click', async () => {
@@ -158,7 +154,7 @@
       submitButton.textContent = 'A validar...';
 
       try {
-        const res  = await fetch('/api/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
+        const res = await fetch('/api/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
         const json = await res.json().catch(() => { throw new Error('Resposta inválida do servidor.'); });
 
         if (!res.ok) {
@@ -184,7 +180,6 @@
       toggleReportButton.textContent = visible ? 'Ocultar relatório completo' : 'Mostrar relatório completo';
     });
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
 
     const esc = v => String(v ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 
@@ -200,7 +195,6 @@
 
     function getWcagLevelMap() {
       return {
-        // A
         titleOk:'A', lang:'A', langValid:'A', button:'A', buttonAname:'A',
         a:'A', linkAName:'A', aSkip:'A', aSkipFirst:'A', img:'A', imgAltNull:'A',
         label:'A', labelAName:'A', form:'A', iframe:'A', hx:'A', h1:'A', hxHasAName:'A',
@@ -208,7 +202,7 @@
         ariaStPermitted:'A', ariaAtribDefined:'A', ariaStValid:'A',
         mainTopLevel:'A', noDuplicateMain:'A', autocomplete:'A',
         videoAudio:'A', audio:'A', meta:'A', metaRefresh:'A', focusVisible:'A',
-        // AA
+
         colorContrastOk:'AA', textContrastHNot:'AA', colorFgBgNo:'AA',
         contentinfoTopLevel:'AA', noDuplicateContentinfo:'AA',
         onlyOneh1:'AA', aSameText:'AA', headers:'AA',
@@ -218,7 +212,7 @@
         resizeText:'AA', orientation:'AA', reflow:'AA',
         inputPurpose:'AA', identify:'AA', errorSuggestion:'AA', errorPrevention:'AA',
         focusOrder:'AA', focusNotObscured:'AA', targetSize:'AA',
-        // AAA
+
         scrollable:'AAA', iframeSame:'AAA', aGrouped:'AAA', abbrDefined:'AAA',
       };
     }
@@ -244,17 +238,16 @@
 
       const total = counts.passed + counts.warning + counts.failed;
       const totalBreakdown = {
-        A:   breakdown.passed.A   + breakdown.warning.A   + breakdown.failed.A,
-        AA:  breakdown.passed.AA  + breakdown.warning.AA  + breakdown.failed.AA,
+        A: breakdown.passed.A   + breakdown.warning.A   + breakdown.failed.A,
+        AA: breakdown.passed.AA  + breakdown.warning.AA  + breakdown.failed.AA,
         AAA: breakdown.passed.AAA + breakdown.warning.AAA + breakdown.failed.AAA,
       };
       return { counts, breakdown, total, totalBreakdown };
     }
 
-    // ── Render Sumário ────────────────────────────────────────────────────────
 
     function renderSummary(report) {
-      const inner     = getInner(report);
+      const inner = getInner(report);
       const practices = extractPractices(report);
       const totalElems = inner?.elems
         ? Object.values(inner.elems).reduce((s, v) => s + (typeof v === 'number' ? v : 0), 0)
@@ -281,8 +274,8 @@
     }
 
     function renderScoreGauge(score) {
-      const val  = score ?? 0;
-      const r    = 50, circ = 2 * Math.PI * r, dash = circ * 0.75;
+      const val = score ?? 0;
+      const r = 50, circ = 2 * Math.PI * r, dash = circ * 0.75;
       const color = val >= 7 ? '#16a34a' : val >= 4 ? '#d97706' : '#dc2626';
       return `
         <div class="score-circle">
@@ -331,7 +324,6 @@
         </table>`;
     }
 
-    // ── Render Relatório Completo ─────────────────────────────────────────────
 
     function renderReport(report) {
       const nodes = getInner(report)?.nodes ?? {};
@@ -345,9 +337,9 @@
       }
 
       const groups = {
-        failed:  { title: 'Não aceitáveis (Erros)',        items: items.filter(i => i.verdict === 'failed')  },
+        failed:  { title: 'Não aceitáveis (Erros)', items: items.filter(i => i.verdict === 'failed')  },
         warning: { title: 'Para ver manualmente (Avisos)', items: items.filter(i => i.verdict === 'warning') },
-        passed:  { title: 'Aceitáveis',                    items: items.filter(i => i.verdict === 'passed')  },
+        passed:  { title: 'Aceitáveis', items: items.filter(i => i.verdict === 'passed')  },
       };
 
       reportContent.innerHTML = `
@@ -368,7 +360,7 @@
 
     function renderItem(item) {
       const check = item.raw;
-      const els   = (check.elements ?? []).slice(0, 6);
+      const els = (check.elements ?? []).slice(0, 6);
       return `
         <article class="report-item ${item.verdict}">
           <div class="report-meta">
@@ -382,8 +374,8 @@
               ${els.map((el, i) => `
                 <div class="element-card">
                   <strong>Elemento ${i+1}</strong>
-                  ${el.htmlCode        ? `<code>${esc(el.htmlCode)}</code>` : ''}
-                  ${el.pointer        ? `<p class="element-pointer">📍 ${esc(el.pointer)}</p>` : ''}
+                  ${el.htmlCode ? `<code>${esc(el.htmlCode)}</code>` : ''}
+                  ${el.pointer ? `<p class="element-pointer">📍 ${esc(el.pointer)}</p>` : ''}
                   ${el.accessibleName ? `<p class="element-pointer">Nome acessível: ${esc(el.accessibleName)}</p>` : ''}
                 </div>`).join('')}
               ${(check.elements?.length ?? 0) > 6 ? `<p class="element-pointer">+ ${check.elements.length - 6} elemento(s) adicionais</p>` : ''}
