@@ -32,6 +32,10 @@ builder.Services.AddHttpClient<AccessMonitorService>((sp, client) =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
+var defaultFileOptions = new DefaultFilesOptions();
+defaultFileOptions.DefaultFileNames.Clear();
+defaultFileOptions.DefaultFileNames.Add("ValidateUrl.html");
+app.UseDefaultFiles(defaultFileOptions);
 app.UseStaticFiles();
 
 if (app.Environment.IsDevelopment())

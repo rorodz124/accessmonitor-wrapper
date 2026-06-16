@@ -3,147 +3,85 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Validar HTML | AccessMonitor Wrapper</title>
+  <title>Validar HTML</title>
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
+  <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
   <style>
-    body {
-      font-family: Inter, system-ui, sans-serif;
-      margin: 0; min-height: 100vh;
-      background: #f3f4f6; color: #111827;
-      padding: 24px; box-sizing: border-box;
-    }
-    .page {
-      width: min(100%, 860px); margin: 0 auto; background: #fff;
-      border-radius: 24px; box-shadow: 0 20px 75px rgba(15,23,42,.12);
-      padding: 32px; box-sizing: border-box;
-    }
-    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; }
-    h1 { margin: 0; font-size: clamp(1.6rem, 2.5vw, 2.2rem); }
-    .link-button {
-      display: inline-flex; align-items: center; justify-content: center;
-      min-height: 44px; padding: 0 20px; border: none; border-radius: 14px;
-      background: #e2e8f0; color: #0f172a; font-size: 1rem; font-weight: 600;
-      text-decoration: none; cursor: pointer;
-    }
+    body{font-family:Inter,system-ui,sans-serif;margin:0;min-height:100vh;background:#f3f4f6;color:#111827;padding:32px 24px;box-sizing:border-box}
+    .page{width:min(100%,760px);margin:0 auto;background:#fff;border-radius:24px;box-shadow:0 20px 75px rgba(15,23,42,.10);padding:36px;box-sizing:border-box}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px}
+    h1{margin:0;font-size:clamp(1.4rem,2.5vw,1.9rem);font-weight:800;letter-spacing:-.02em}
+    .link-button{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 18px;border:none;border-radius:12px;background:#f1f5f9;color:#0f172a;font-size:.9rem;font-weight:600;text-decoration:none;white-space:nowrap}
+    .link-button:hover{background:#e2e8f0}
+    label{display:block;margin-bottom:8px;font-weight:600;font-size:.9rem;color:#374151}
 
-    label { display: block; margin-bottom: 8px; font-weight: 600; }
-    textarea {
-      width: 100%; min-height: 280px; resize: vertical;
-      padding: 14px 16px; border: 1px solid #cbd5e1; border-radius: 14px;
-      font: .9rem/1.6 ui-monospace, Menlo, monospace; color: #0f172a;
-      outline: none; box-sizing: border-box; background: #f8fafc;
-    }
-    textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+    /* Quill — aspeto do projeto de tradução */
+    #editor-container{margin-bottom:20px;border-radius:14px;border:1.5px solid #e2e8f0;background:#f8fafc;overflow:hidden;display:flex;flex-direction:column;transition:border-color .15s,box-shadow .15s}
+    #editor-container:focus-within{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.10)}
+    .ql-toolbar{border:none!important;border-bottom:1.5px solid #e2e8f0!important;background:#fff;padding:10px 14px!important;border-radius:8px 8px 0 0!important}
+    .ql-container{border:none!important;font-family:Inter,system-ui,sans-serif!important;font-size:.95rem;background:#fff;border-radius:0 0 8px 8px!important}
+    .ql-editor{min-height:260px;padding:14px 16px!important}
 
-    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; align-items: center; }
-    button {
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      min-height: 44px; padding: 0 20px; border: none; border-radius: 14px;
-      background: #2563eb; color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer;
-    }
-    button.secondary { background: #e2e8f0; color: #0f172a; }
-    button:disabled  { background: #93c5fd; cursor: not-allowed; }
-    .status-text { font-size: .9rem; color: #64748b; margin-left: auto; }
+    /* Buttons */
+    button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:0 20px;border:2px solid transparent;border-radius:12px;font-size:.92rem;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;align-items:center}
+    button.primary{background:#2563eb;color:#fff;border-color:#2563eb}
+    button.primary:hover{background:#1d4ed8;border-color:#1d4ed8}
+    button.primary:disabled{background:#93c5fd;border-color:#93c5fd;cursor:not-allowed}
+    button.secondary{background:#f1f5f9;color:#374151;border-color:#e2e8f0}
+    button.secondary:hover{background:#e2e8f0}
+    button.auto-off{background:#f8fafc;color:#475569;border-color:#e2e8f0}
+    button.auto-off:hover{border-color:#94a3b8}
+    button.auto-on{background:#f0fdf4;color:#166534;border-color:#4ade80}
+    button.auto-on .auto-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#16a34a;animation:pulse 1.4s ease-in-out infinite}
+    button.auto-off .auto-dot{display:none}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+    .meta-right{display:flex;align-items:center;gap:14px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+    .status-text{font-size:.82rem;color:#94a3b8}
+    .countdown-text{font-size:.82rem;color:#64748b;font-variant-numeric:tabular-nums}
+    .spin{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;flex-shrink:0}
+    @keyframes sp{to{transform:rotate(360deg)}}
 
-    .summary-card {
-      margin-top: 28px; border: 1px solid #e2e8f0; border-radius: 20px;
-      padding: 24px; background: #f8fafc;
-      display: flex; align-items: center; gap: 32px; flex-wrap: wrap;
-    }
-
-    .score-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0; }
-    .score-circle { position: relative; width: 120px; height: 120px; }
-    .score-circle svg { transform: rotate(-90deg); }
-    .score-circle .score-bg { fill: none; stroke: #e2e8f0; stroke-width: 10; }
-    .score-circle .score-fg { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset .8s ease; }
-    .score-text {
-      position: absolute; inset: 0; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      font-size: 2rem; font-weight: 800; color: #111827; line-height: 1;
-    }
-    .score-text small { font-size: .75rem; font-weight: 500; color: #64748b; margin-top: 2px; }
-
-    .summary-info { flex: 1; min-width: 200px; }
-    .summary-info h2 { margin: 0 0 12px; font-size: .85rem; color: #64748b; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
-    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .chip { border-radius: 999px; padding: 5px 13px; font-size: .82rem; font-weight: 700; }
-    .chip-red   { background: #fee2e2; color: #991b1b; }
-    .chip-amber { background: #fef3c7; color: #92400e; }
-    .chip-slate { background: #e2e8f0; color: #334155; }
-    .chip-green { background: #dcfce7; color: #166534; }
-    .conform-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-    .conform-badge {
-      background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
-      padding: 6px 14px; font-size: .8rem; font-weight: 700; text-align: center;
-    }
-    .conform-badge .level { display: block; font-size: .7rem; color: #64748b; font-weight: 400; margin-top: 1px; }
-    .conform-badge.has-errors { border-color: #fecaca; background: #fee2e2; color: #991b1b; }
-
-
-    .section { margin-top: 28px; }
-    .section-title {
-      font-size: 1rem; font-weight: 800; margin: 0 0 12px;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .count-pill {
-      border-radius: 999px; padding: 2px 10px; font-size: .78rem; font-weight: 700;
-      background: #fee2e2; color: #991b1b;
-    }
-    .count-pill.warn { background: #fef3c7; color: #92400e; }
-
-    .issue-list { display: grid; gap: 10px; }
-    .issue {
-      border: 1px solid #e5e7eb; border-left: 5px solid #dc2626;
-      border-radius: 14px; overflow: hidden; background: #fff;
-    }
-    .issue.warning { border-left-color: #d97706; }
-
-    .issue-head {
-      display: flex; align-items: flex-start; gap: 10px;
-      padding: 14px 16px; cursor: pointer; user-select: none;
-    }
-    .issue-head:hover { background: #f8fafc; }
-    .pill {
-      flex-shrink: 0; border-radius: 999px; padding: 3px 10px;
-      font-size: .75rem; font-weight: 700;
-    }
-    .pill.error   { background: #fee2e2; color: #991b1b; }
-    .pill.warning { background: #fef3c7; color: #92400e; }
-    .pill.crit    { background: #e2e8f0; color: #334155; }
-    .issue-desc   { flex: 1; font-size: .92rem; line-height: 1.5; padding-top: 2px; }
-    .arrow { color: #94a3b8; flex-shrink: 0; padding-top: 4px; transition: transform .2s; }
-    .arrow.open { transform: rotate(180deg); }
-
-    .issue-body { display: none; padding: 0 16px 14px; border-top: 1px solid #f1f5f9; }
-    .issue-body.open { display: block; }
-    .elem-list { display: grid; gap: 8px; margin-top: 10px; }
-    .elem {
-      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px;
-    }
-    .elem-ptr { font-size: .78rem; color: #64748b; margin-bottom: 5px; }
-    pre { margin: 0; font: .82rem/1.5 ui-monospace, Menlo, monospace;
-          white-space: pre-wrap; word-break: break-all; color: #0f172a; overflow-x: auto; }
-
-
-    .notice {
-      margin-top: 24px; padding: 18px 20px; border-radius: 16px;
-      font-size: .92rem; line-height: 1.5;
-    }
-    .notice-ok  { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-    .notice-err { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-
-
-    .spin {
-      width: 16px; height: 16px; border: 2.5px solid rgba(255,255,255,.3);
-      border-top-color: #fff; border-radius: 50%;
-      animation: sp .6s linear infinite; flex-shrink: 0;
-    }
-    @keyframes sp { to { transform: rotate(360deg); } }
-
-    @media (max-width: 600px) {
-      body { padding: 12px; }
-      .page { padding: 20px; border-radius: 16px; }
-      .topbar { flex-direction: column; align-items: flex-start; }
-    }
+    .summary-card{margin-top:28px;border-radius:20px;background:linear-gradient(135deg,#f8fafc 0%,#f1f5f9 100%);border:1.5px solid #e2e8f0;padding:28px 32px;display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap}
+    .score-circle{position:relative;width:100px;height:100px;flex-shrink:0}
+    .score-circle svg{transform:rotate(-90deg)}
+    .score-bg{fill:none;stroke:#e2e8f0;stroke-width:9}
+    .score-fg{fill:none;stroke-width:9;stroke-linecap:round}
+    .score-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:1.65rem;font-weight:800;color:#111827;line-height:1}
+    .score-text small{font-size:.65rem;font-weight:500;color:#94a3b8;margin-top:2px;text-transform:uppercase;letter-spacing:.03em}
+    .vdiv{width:1px;height:70px;background:#e2e8f0;flex-shrink:0}
+    .stats-group{display:flex;gap:14px}
+    .stat-chip{display:flex;flex-direction:column;align-items:center;gap:4px;padding:18px 28px;border-radius:16px;min-width:80px;border:1.5px solid transparent}
+    .stat-chip.errors{background:#fff1f2;border-color:#fecdd3}
+    .stat-chip.warnings{background:#fffbeb;border-color:#fde68a}
+    .stat-chip .num{font-size:2.2rem;font-weight:900;line-height:1}
+    .stat-chip.errors .num{color:#dc2626}
+    .stat-chip.warnings .num{color:#d97706}
+    .stat-chip .lbl{font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#6b7280}
+    .issues-section{margin-top:28px}
+    .issues-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:12px}
+    .issue-list{display:grid;gap:8px}
+    .issue-item{border-radius:14px;background:#fff;border:1.5px solid #e5e7eb;overflow:hidden}
+    .issue-item.failed{border-left:4px solid #ef4444}
+    .issue-item.warning{border-left:4px solid #f59e0b}
+    .issue-row{display:flex;align-items:flex-start;gap:10px;padding:13px 16px;cursor:pointer;user-select:none}
+    .issue-row:hover{background:#f8fafc}
+    .pill{flex-shrink:0;border-radius:8px;padding:2px 9px;font-size:.72rem;font-weight:700}
+    .pill.failed{background:#fee2e2;color:#b91c1c}
+    .pill.warning{background:#fef3c7;color:#92400e}
+    .pill.code{background:#f1f5f9;color:#475569;font-family:ui-monospace,monospace}
+    .issue-desc{flex:1;font-size:.9rem;line-height:1.5;color:#1e293b;padding-top:1px}
+    .chevron{color:#cbd5e1;flex-shrink:0;margin-top:3px;transition:transform .2s;font-size:.8rem}
+    .chevron.open{transform:rotate(180deg)}
+    .issue-body{display:none;padding:0 16px 14px}
+    .issue-body.open{display:block}
+    .element-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;margin-top:6px}
+    .element-ptr{font-size:.76rem;color:#64748b;margin-bottom:4px}
+    pre{margin:0;font:.8rem/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-all;color:#0f172a}
+    .more-elems{color:#94a3b8;font-size:.8rem;margin:6px 0 0}
+    .notice-ok{margin-top:24px;padding:16px 20px;border-radius:14px;background:#f0fdf4;color:#166534;border:1.5px solid #bbf7d0;font-size:.9rem}
+    .notice-err{margin-top:24px;padding:16px 20px;border-radius:14px;background:#fff1f2;color:#b91c1c;border:1.5px solid #fecdd3;font-size:.9rem}
+    @media(max-width:520px){body{padding:12px}.page{padding:20px;border-radius:16px}.topbar{flex-direction:column;align-items:flex-start}.summary-card{padding:20px;gap:20px}.stats-group{gap:10px}.stat-chip{padding:14px 18px}}
   </style>
 </head>
 <body>
@@ -153,176 +91,172 @@
       <a class="link-button" href="/ValidateUrl.html">Validar por URL</a>
     </div>
 
-    <label for="htmlInput">Conteúdo HTML</label>
-    <textarea id="htmlInput" spellcheck="false"
-      placeholder="<!doctype html>&#10;<html lang=&quot;pt&quot;>&#10;  <head><title>Página</title></head>&#10;  <body><h1>Título</h1></body>&#10;</html>"></textarea>
+    <label>Conteúdo HTML</label>
+    <div id="editor-container">
+      <div id="editor">
+        <h1>Título principal</h1>
+        <p>Escreva ou cole aqui o conteúdo HTML que pretende validar.</p>
+      </div>
+    </div>
 
     <div class="actions">
-      <button id="btnVerify">Verificar</button>
-      <button id="btnClear" class="secondary">Limpar</button>
-      <span class="status-text" id="statusText" aria-live="polite"></span>
+      <button class="primary" id="btnVerify">Verificar</button>
+      <button class="secondary" id="btnClear">Limpar</button>
+      <button class="auto-off" id="btnAuto">
+        <span class="auto-dot"></span>
+        Auto-verificar
+      </button>
+      <div class="meta-right">
+        <span class="countdown-text" id="countdownText"></span>
+        <span class="status-text" id="statusText" aria-live="polite"></span>
+      </div>
     </div>
 
     <div id="results"></div>
+    <div id="issuesSection"></div>
   </main>
 
   <script>
-    const taEl = document.getElementById('htmlInput');
-    const btnV = document.getElementById('btnVerify');
-    const btnC = document.getElementById('btnClear');
-    const status = document.getElementById('statusText');
-    const results = document.getElementById('results');
+    const $  = id => document.getElementById(id);
+    const btnV = $('btnVerify'), btnC = $('btnClear'), btnAuto = $('btnAuto');
+    const statusEl = $('statusText'), countdownEl = $('countdownText');
+    const resultsEl = $('results'), issuesSec = $('issuesSection');
     let ac = null;
 
-    btnC.onclick = () => { taEl.value = ''; results.innerHTML = ''; status.textContent = ''; };
+    const quill = new Quill('#editor', {
+      theme: 'snow',
+      placeholder: 'Escreva ou cole aqui o conteúdo HTML...',
+      modules: { toolbar: [[{header:[1,2,3,false]}],['bold','italic','underline','strike'],[{list:'ordered'},{list:'bullet'}],['clean']] }
+    });
+
+    const esc = v => String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+
+    btnC.onclick = () => {
+      quill.setText('');
+      resultsEl.innerHTML = ''; issuesSec.innerHTML = '';
+      statusEl.textContent = '';
+      sessionStorage.removeItem('lastHtml'); sessionStorage.removeItem('lastHtmlReport');
+    };
+
+    const AUTO_SECS = 30;
+    let autoEnabled = false, autoTimer = null, autoCountdown = AUTO_SECS;
+
+    btnAuto.onclick = () => {
+      autoEnabled = !autoEnabled;
+      btnAuto.className = autoEnabled ? 'auto-on' : 'auto-off';
+      if (autoEnabled) { autoCountdown = AUTO_SECS; updateCountdown(); autoTimer = setInterval(autoTick, 1000); }
+      else { clearInterval(autoTimer); autoTimer = null; countdownEl.textContent = ''; }
+    };
+    function autoTick() { if (--autoCountdown <= 0) { autoCountdown = AUTO_SECS; runValidation(); } updateCountdown(); }
+    function updateCountdown() { countdownEl.textContent = autoEnabled ? `próxima verificação em ${autoCountdown}s` : ''; }
+    quill.on('text-change', () => { if (autoEnabled) { autoCountdown = AUTO_SECS; updateCountdown(); } });
+
     btnV.onclick = runValidation;
 
     async function runValidation() {
-      const html = taEl.value.trim();
-      if (!html) { notice('err', 'Insira HTML antes de verificar.'); return; }
-
+      const html = quill.root.innerHTML.trim();
+      if (!html || html === '<p><br></p>') {
+        resultsEl.innerHTML = '<div class="notice-err">Insira HTML antes de verificar.</div>';
+        issuesSec.innerHTML = ''; return;
+      }
       ac?.abort(); ac = new AbortController();
-      btnV.disabled = true;
-      btnV.innerHTML = '<span class="spin"></span> A verificar…';
-      results.innerHTML = '';
-      status.textContent = '';
+      btnV.disabled = true; btnV.innerHTML = '<span class="spin"></span> A verificar…';
+      resultsEl.innerHTML = ''; issuesSec.innerHTML = ''; statusEl.textContent = '';
+
+      const fullHtml = html.toLowerCase().includes('<!doctype') ? html
+        : `<!DOCTYPE html>\n<html>\n<head>\n  <title>Página de Teste</title>\n</head>\n<body>\n  ${html}\n</body>\n</html>`;
 
       try {
-        const res  = await fetch('/api/validate/html', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ html }),
-          signal: ac.signal
-        });
+        const res  = await fetch('/api/validate/html', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({html:fullHtml}), signal:ac.signal });
         const json = await res.json();
-        if (!res.ok) { notice('err', json.error || `Erro ${res.status}`); return; }
-        renderResults(json);
-        status.textContent = 'Atualizado: ' + new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-      } catch (e) {
-        if (e.name !== 'AbortError') notice('err', 'Não foi possível contactar o serviço. Tente novamente.');
-      } finally {
-        btnV.disabled = false;
-        btnV.innerHTML = 'Verificar';
-        ac = null;
-      }
+        if (!res.ok) { resultsEl.innerHTML = `<div class="notice-err">${esc(json.error??`Erro ${res.status}`)}</div>`; return; }
+        sessionStorage.setItem('lastHtml', html); sessionStorage.setItem('lastHtmlReport', JSON.stringify(json));
+        renderSummary(json); renderIssues(json);
+        statusEl.textContent = 'Atualizado: ' + new Date().toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'});
+      } catch(e) {
+        if (e.name !== 'AbortError') resultsEl.innerHTML = '<div class="notice-err">Não foi possível contactar o serviço. Tente novamente.</div>';
+      } finally { btnV.disabled = false; btnV.innerHTML = 'Verificar'; ac = null; }
     }
 
-    function renderResults(r) {
-      const errors   = r.errors   || [];
-      const warnings = r.warnings || [];
-      const score    = parseFloat(r.score) || 0;
-      const cA   = r.conform?.A   ?? '0';
-      const cAA  = r.conform?.AA  ?? '0';
-      const cAAA = r.conform?.AAA ?? '0';
-      const color = score >= 7 ? '#16a34a' : score >= 4 ? '#d97706' : '#dc2626';
+    const getInner = r => r?.data?.data ?? r?.data ?? r;
+    function normalizeVerdict(v) {
+      const s = String(v??'').trim().toLowerCase();
+      if (['failed','fail','false'].includes(s)) return 'failed';
+      if (['warning','warn'].includes(s)) return 'warning';
+      if (['passed','pass','true','success'].includes(s)) return 'passed';
+      return 'inapplicable';
+    }
+    function extractItems(r) {
+      const items = [];
+      for (const checks of Object.values(getInner(r)?.nodes??{})) {
+        if (!Array.isArray(checks)) continue;
+        for (const c of checks) { const v = normalizeVerdict(c.verdict); if (v !== 'inapplicable') items.push({verdict:v,raw:c}); }
+      }
+      return items;
+    }
 
-      const R = 50, circ = 2 * Math.PI * R, dash = circ * 0.75;
-      const targetOffset = -((dash - score / 10 * dash) - circ * .125);
-
-      let h = `
+    function renderSummary(r) {
+      const inner = getInner(r), score = inner?.score != null ? parseFloat(inner.score) : 0;
+      const items = extractItems(r);
+      const errs = items.filter(i=>i.verdict==='failed'), warns = items.filter(i=>i.verdict==='warning');
+      const color = score>=7?'#16a34a':score>=4?'#d97706':'#dc2626';
+      const R=42, circ=2*Math.PI*R, dash=circ*.75, target=-((dash-score/10*dash)-circ*.125);
+      sessionStorage.setItem('currentReport', JSON.stringify(r));
+      resultsEl.innerHTML = `
         <div class="summary-card">
-          <div class="score-wrap">
-            <div class="score-circle">
-              <svg viewBox="0 0 120 120" width="120" height="120">
-                <circle class="score-bg" cx="60" cy="60" r="${R}"
-                  stroke-dasharray="${dash} ${circ - dash}"
-                  stroke-dashoffset="${-(circ * .125)}" />
-                <circle class="score-fg" id="gaugeArc" cx="60" cy="60" r="${R}"
-                  stroke="${color}"
-                  stroke-dasharray="${dash} ${circ - dash}"
-                  stroke-dashoffset="${dash + circ * .125}"
-                  data-target="${targetOffset}" />
-              </svg>
-              <div class="score-text">${score.toFixed(1)}<small>Pontuação</small></div>
-            </div>
+          <div class="score-circle">
+            <svg viewBox="0 0 100 100" width="100" height="100">
+              <circle class="score-bg" cx="50" cy="50" r="${R}" stroke-dasharray="${dash} ${circ-dash}" stroke-dashoffset="${-(circ*.125)}"/>
+              <circle class="score-fg" id="gaugeArc" cx="50" cy="50" r="${R}" stroke="${color}"
+                stroke-dasharray="${dash} ${circ-dash}" stroke-dashoffset="${dash+circ*.125}" data-target="${target}"/>
+            </svg>
+            <div class="score-text">${score.toFixed(1)}<small>Score</small></div>
           </div>
-          <div class="summary-info">
-            <h2>Avaliação de acessibilidade</h2>
-            <div class="chips">
-              ${errors.length
-                ? `<span class="chip chip-red"> ${errors.length} erro${errors.length !== 1 ? 's' : ''}</span>`
-                : `<span class="chip chip-green">✓ Sem erros</span>`}
-              ${warnings.length ? `<span class="chip chip-amber">⚠ ${warnings.length} aviso${warnings.length !== 1 ? 's' : ''}</span>` : ''}
-            </div>
-            <div class="conform-row">
-              <div class="conform-badge ${+cA   > 0 ? 'has-errors' : ''}">
-                ${cA} erro${cA   !== '1' ? 's' : ''}<span class="level">Nível A</span>
-              </div>
-              <div class="conform-badge ${+cAA  > 0 ? 'has-errors' : ''}">
-                ${cAA} erro${cAA  !== '1' ? 's' : ''}<span class="level">Nível AA</span>
-              </div>
-              <div class="conform-badge ${+cAAA > 0 ? 'has-errors' : ''}">
-                ${cAAA} erro${cAAA !== '1' ? 's' : ''}<span class="level">Nível AAA</span>
-              </div>
-            </div>
+          <div class="vdiv"></div>
+          <div class="stats-group">
+            <div class="stat-chip errors"><span class="num">${errs.length}</span><span class="lbl">Erros</span></div>
+            <div class="stat-chip warnings"><span class="num">${warns.length}</span><span class="lbl">Avisos</span></div>
           </div>
         </div>`;
-
-      if (!errors.length && !warnings.length) {
-        h += `<div class="notice notice-ok">✅ Nenhum problema de acessibilidade encontrado neste HTML.</div>`;
-      } else {
-        if (errors.length) {
-          h += `<div class="section">
-            <div class="section-title">Erros <span class="count-pill">${errors.length}</span></div>
-            <div class="issue-list">${errors.map((e, i) => renderIssue(e, 'error', i)).join('')}</div>
-          </div>`;
-        }
-        if (warnings.length) {
-          h += `<div class="section">
-            <div class="section-title">Avisos <span class="count-pill warn">${warnings.length}</span></div>
-            <div class="issue-list">${warnings.map((e, i) => renderIssue(e, 'warning', 1000 + i)).join('')}</div>
-          </div>`;
-        }
-      }
-
-      results.innerHTML = h;
-
       requestAnimationFrame(() => {
         const arc = document.getElementById('gaugeArc');
-        if (arc) arc.style.strokeDashoffset = arc.dataset.target;
+        if (arc) { arc.style.transition='stroke-dashoffset .8s ease'; arc.style.strokeDashoffset=arc.dataset.target; }
       });
+    }
 
-      results.querySelectorAll('.issue-head').forEach(head => {
-        head.addEventListener('click', () => {
-          const body  = head.nextElementSibling;
-          const arrow = head.querySelector('.arrow');
-          if (!body) return;
-          const open = body.classList.toggle('open');
-          arrow?.classList.toggle('open', open);
+    function renderIssues(r) {
+      const items = extractItems(r);
+      const all = [...items.filter(i=>i.verdict==='failed'),...items.filter(i=>i.verdict==='warning')].map(i=>({...i.raw,verdict:i.verdict}));
+      if (!all.length) { issuesSec.innerHTML = '<div class="notice-ok">✅ Nenhum problema de acessibilidade encontrado neste HTML.</div>'; return; }
+      issuesSec.innerHTML = `<div class="issues-section"><div class="issues-title">Erros e Avisos encontrados</div><div class="issue-list">${all.map(renderIssue).join('')}</div></div>`;
+      issuesSec.querySelectorAll('.issue-row').forEach(row => {
+        row.addEventListener('click', () => {
+          const body = row.nextElementSibling, chev = row.querySelector('.chevron');
+          if (body) { const open = body.classList.toggle('open'); chev?.classList.toggle('open', open); }
         });
       });
     }
 
-    function renderIssue(item, type, idx) {
-      const elems = (item.elements || []).slice(0, 5);
-      const elemsHtml = elems.length ? `
-        <div class="elem-list">
-          ${elems.map(el => `
-            <div class="elem">
-              ${el.pointer  ? `<div class="elem-ptr">📍 ${x(el.pointer)}</div>` : ''}
-              ${el.htmlCode ? `<pre>${x(el.htmlCode)}</pre>` : ''}
-            </div>`).join('')}
-          ${(item.elements?.length ?? 0) > 5 ? `<p style="color:#64748b;font-size:.82rem;margin:8px 0 0">+ ${item.elements.length - 5} elemento(s) adicionais</p>` : ''}
-        </div>` : '';
-
-      const hasBody = !!elemsHtml;
-      return `
-        <article class="issue ${type}">
-          <div class="issue-head">
-            <span class="pill ${type}">${type === 'error' ? 'Erro' : 'Aviso'}</span>
-            ${item.criterion ? `<span class="pill crit">${x(item.criterion)}</span>` : ''}
-            <span class="issue-desc">${x(item.description || '(sem descrição)')}</span>
-            ${hasBody ? `<span class="arrow">▾</span>` : ''}
-          </div>
-          ${hasBody ? `<div class="issue-body">${elemsHtml}</div>` : ''}
-        </article>`;
+    function renderIssue(item) {
+      const els = (item.elements||[]).slice(0,5), hasBody = els.length>0;
+      return `<article class="issue-item ${item.verdict}">
+        <div class="issue-row">
+          <span class="pill ${item.verdict}">${item.verdict==='failed'?'Erro':'Aviso'}</span>
+          ${item.resultCode?`<span class="pill code">${esc(item.resultCode)}</span>`:''}
+          <span class="issue-desc">${esc(item.description||'(sem descrição)')}</span>
+          ${hasBody?'<span class="chevron">▾</span>':''}
+        </div>
+        ${hasBody?`<div class="issue-body">${els.map(el=>`<div class="element-card">
+          ${el.pointer?`<div class="element-ptr">📍 ${esc(el.pointer)}</div>`:''}
+          ${el.htmlCode?`<pre>${esc(el.htmlCode)}</pre>`:''}
+        </div>`).join('')}${(item.elements?.length??0)>5?`<p class="more-elems">+ ${item.elements.length-5} elemento(s) adicionais</p>`:''}</div>`:''}
+      </article>`;
     }
 
-    function notice(type, msg) {
-      results.innerHTML = `<div class="notice notice-${type === 'err' ? 'err' : 'ok'}">${x(msg)}</div>`;
-    }
-
-    const x = v => String(v ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
+    window.addEventListener('load', () => {
+      const h = sessionStorage.getItem('lastHtml'), rep = sessionStorage.getItem('lastHtmlReport');
+      if (h && rep) { quill.root.innerHTML = h; const r = JSON.parse(rep); renderSummary(r); renderIssues(r); }
+    });
   </script>
 </body>
 </html>

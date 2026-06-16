@@ -1,22 +1,4 @@
 services:
-  accessmonitor:
-    image: acessibilidade/accessmonitor-web:1.0.1
-    container_name: accessmonitor
-    ports:
-      - "80:80"
-    environment:
-      NODE_ENV: production
-      REACT_APP_AMP_SERVER: http://localhost:3000/amp
-      REACT_APP_BASE_URL: /
-      REACT_APP_SERVER_URL: /
-      REACT_APP_API_DATA_SOURCE: remote
-    depends_on:
-      accessmonitor-backend:
-        condition: service_healthy
-    networks:
-      - access-monitor-network
-
-
   accessmonitor-backend:
     image: acessibilidade/accessmonitor-api:1.0.0
     container_name: accessmonitor-backend
