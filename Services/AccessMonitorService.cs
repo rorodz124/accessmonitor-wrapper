@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace AccessMonitorWrapper.Services;
 
@@ -29,8 +28,18 @@ public class AccessMonitorService
         AddReferer(req);
 
         var body = await SendAndReadAsync(req, url);
-        using var doc = JsonDocument.Parse(body);
-        return doc.RootElement.Clone();
+
+        try
+        {
+            using var doc = JsonDocument.Parse(body);
+            return doc.RootElement.Clone();
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Failed to parse AccessMonitor response for URL: {Url}. Body snippet: {Body}",
+                url, body[..Math.Min(body.Length, 300)]);
+            throw new AccessMonitorException("Resposta inválida do AccessMonitor.", HttpStatusCode.BadGateway);
+        }
     }
 
     public async Task<JsonElement> EvaluateHtmlAsync(string html)
@@ -90,11 +99,11 @@ public class AccessMonitorService
             throw new AccessMonitorException($"AccessMonitor devolveu erro {(int)res.StatusCode}.", res.StatusCode);
         }
 
-        var ct = res.Content.Headers.ContentType?.MediaType ?? "";
-        if (!ct.StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
+        var contentType = res.Content.Headers.ContentType?.MediaType ?? "";
+        if (!contentType.StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
         {
-            _logger.LogWarning("AccessMonitor unexpected Content-Type '{CT}' for {Context}", ct, context);
-            throw new AccessMonitorException($"Tipo de conteúdo inesperado: {ct}.", HttpStatusCode.BadGateway);
+            _logger.LogWarning("AccessMonitor unexpected Content-Type '{ContentType}' for {Context}", contentType, context);
+            throw new AccessMonitorException($"Tipo de conteúdo inesperado: {contentType}.", HttpStatusCode.BadGateway);
         }
 
         return body;

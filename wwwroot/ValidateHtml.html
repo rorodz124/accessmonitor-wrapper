@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Validar HTML</title>
-  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
-  <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
   <style>
     body{font-family:Inter,system-ui,sans-serif;margin:0;min-height:100vh;background:#f3f4f6;color:#111827;padding:32px 24px;box-sizing:border-box}
     .page{width:min(100%,760px);margin:0 auto;background:#fff;border-radius:24px;box-shadow:0 20px 75px rgba(15,23,42,.10);padding:36px;box-sizing:border-box}
@@ -15,14 +13,9 @@
     .link-button:hover{background:#e2e8f0}
     label{display:block;margin-bottom:8px;font-weight:600;font-size:.9rem;color:#374151}
 
-    /* Quill — aspeto do projeto de tradução */
-    #editor-container{margin-bottom:20px;border-radius:14px;border:1.5px solid #e2e8f0;background:#f8fafc;overflow:hidden;display:flex;flex-direction:column;transition:border-color .15s,box-shadow .15s}
-    #editor-container:focus-within{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.10)}
-    .ql-toolbar{border:none!important;border-bottom:1.5px solid #e2e8f0!important;background:#fff;padding:10px 14px!important;border-radius:8px 8px 0 0!important}
-    .ql-container{border:none!important;font-family:Inter,system-ui,sans-serif!important;font-size:.95rem;background:#fff;border-radius:0 0 8px 8px!important}
-    .ql-editor{min-height:260px;padding:14px 16px!important}
+    textarea{width:100%;min-height:280px;resize:vertical;padding:14px 16px;border:1.5px solid #e2e8f0;border-radius:14px;font:.9rem/1.6 ui-monospace,Menlo,monospace;color:#0f172a;outline:none;box-sizing:border-box;background:#f8fafc;margin-bottom:20px;transition:border-color .15s,box-shadow .15s}
+    textarea:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.10)}
 
-    /* Buttons */
     button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:0 20px;border:2px solid transparent;border-radius:12px;font-size:.92rem;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s}
     .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;align-items:center}
     button.primary{background:#2563eb;color:#fff;border-color:#2563eb}
@@ -91,13 +84,9 @@
       <a class="link-button" href="/ValidateUrl.html">Validar por URL</a>
     </div>
 
-    <label>Conteúdo HTML</label>
-    <div id="editor-container">
-      <div id="editor">
-        <h1>Título principal</h1>
-        <p>Escreva ou cole aqui o conteúdo HTML que pretende validar.</p>
-      </div>
-    </div>
+    <label for="htmlInput">Conteúdo HTML</label>
+    <textarea id="htmlInput" spellcheck="false"
+      placeholder="<!doctype html>&#10;<html lang=&quot;pt&quot;>&#10;  <head><title>Página</title></head>&#10;  <body><h1>Título</h1></body>&#10;</html>"></textarea>
 
     <div class="actions">
       <button class="primary" id="btnVerify">Verificar</button>
@@ -123,16 +112,12 @@
     const resultsEl = $('results'), issuesSec = $('issuesSection');
     let ac = null;
 
-    const quill = new Quill('#editor', {
-      theme: 'snow',
-      placeholder: 'Escreva ou cole aqui o conteúdo HTML...',
-      modules: { toolbar: [[{header:[1,2,3,false]}],['bold','italic','underline','strike'],[{list:'ordered'},{list:'bullet'}],['clean']] }
-    });
+    const taEl = $('htmlInput');
 
     const esc = v => String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 
     btnC.onclick = () => {
-      quill.setText('');
+      taEl.value = '';
       resultsEl.innerHTML = ''; issuesSec.innerHTML = '';
       statusEl.textContent = '';
       sessionStorage.removeItem('lastHtml'); sessionStorage.removeItem('lastHtmlReport');
@@ -149,13 +134,13 @@
     };
     function autoTick() { if (--autoCountdown <= 0) { autoCountdown = AUTO_SECS; runValidation(); } updateCountdown(); }
     function updateCountdown() { countdownEl.textContent = autoEnabled ? `próxima verificação em ${autoCountdown}s` : ''; }
-    quill.on('text-change', () => { if (autoEnabled) { autoCountdown = AUTO_SECS; updateCountdown(); } });
+    taEl.addEventListener('input', () => { if (autoEnabled) { autoCountdown = AUTO_SECS; updateCountdown(); } });
 
     btnV.onclick = runValidation;
 
     async function runValidation() {
-      const html = quill.root.innerHTML.trim();
-      if (!html || html === '<p><br></p>') {
+      const html = taEl.value.trim();
+      if (!html) {
         resultsEl.innerHTML = '<div class="notice-err">Insira HTML antes de verificar.</div>';
         issuesSec.innerHTML = ''; return;
       }
@@ -164,7 +149,7 @@
       resultsEl.innerHTML = ''; issuesSec.innerHTML = ''; statusEl.textContent = '';
 
       const fullHtml = html.toLowerCase().includes('<!doctype') ? html
-        : `<!DOCTYPE html>\n<html>\n<head>\n  <title>Página de Teste</title>\n</head>\n<body>\n  ${html}\n</body>\n</html>`;
+        : `<!DOCTYPE html>\n<html lang="pt">\n<head>\n  <meta charset="UTF-8">\n  <title>Página de Teste</title>\n</head>\n<body>\n  ${html}\n</body>\n</html>`;
 
       try {
         const res  = await fetch('/api/validate/html', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({html:fullHtml}), signal:ac.signal });
@@ -179,24 +164,38 @@
     }
 
     const getInner = r => r?.data?.data ?? r?.data ?? r;
+    function parseScore(v) { return parseFloat(String(v ?? '').replace(',', '.')); }
     function normalizeVerdict(v) {
       const s = String(v??'').trim().toLowerCase();
-      if (['failed','fail','false'].includes(s)) return 'failed';
-      if (['warning','warn'].includes(s)) return 'warning';
-      if (['passed','pass','true','success'].includes(s)) return 'passed';
-      return 'inapplicable';
+      if (['failed','fail','false','error','errors'].includes(s)) return 'failed';
+      if (['warning','warn','alert'].includes(s)) return 'warning';
+      if (['passed','pass','true','success','ok'].includes(s)) return 'passed';
+      if (['inapplicable','n/a','na','not applicable','nao aplicavel'].includes(s)) return 'inapplicable';
+      console.warn('AccessMonitor devolveu um verdict desconhecido:', v);
+      return 'warning';
     }
     function extractItems(r) {
-      const items = [];
-      for (const checks of Object.values(getInner(r)?.nodes??{})) {
+      const nodes = getInner(r)?.nodes ?? {};
+      const groups = new Map();
+      for (const [criterion, checks] of Object.entries(nodes)) {
         if (!Array.isArray(checks)) continue;
-        for (const c of checks) { const v = normalizeVerdict(c.verdict); if (v !== 'inapplicable') items.push({verdict:v,raw:c}); }
+        for (const c of checks) {
+          const v = normalizeVerdict(c.verdict);
+          if (v === 'inapplicable') continue;
+          const description = c.description || criterion;
+          const key = `${v}|${c.resultCode||''}|${description}`;
+          if (!groups.has(key)) {
+            groups.set(key, { verdict: v, criterion, description, resultCode: c.resultCode, elements: [] });
+          }
+          const g = groups.get(key);
+          if (Array.isArray(c.elements)) g.elements.push(...c.elements);
+        }
       }
-      return items;
+      return [...groups.values()];
     }
 
     function renderSummary(r) {
-      const inner = getInner(r), score = inner?.score != null ? parseFloat(inner.score) : 0;
+      const inner = getInner(r), score = inner?.score != null ? parseScore(inner.score) : 0;
       const items = extractItems(r);
       const errs = items.filter(i=>i.verdict==='failed'), warns = items.filter(i=>i.verdict==='warning');
       const color = score>=7?'#16a34a':score>=4?'#d97706':'#dc2626';
@@ -226,7 +225,7 @@
 
     function renderIssues(r) {
       const items = extractItems(r);
-      const all = [...items.filter(i=>i.verdict==='failed'),...items.filter(i=>i.verdict==='warning')].map(i=>({...i.raw,verdict:i.verdict}));
+      const all = [...items.filter(i=>i.verdict==='failed'),...items.filter(i=>i.verdict==='warning')];
       if (!all.length) { issuesSec.innerHTML = '<div class="notice-ok">✅ Nenhum problema de acessibilidade encontrado neste HTML.</div>'; return; }
       issuesSec.innerHTML = `<div class="issues-section"><div class="issues-title">Erros e Avisos encontrados</div><div class="issue-list">${all.map(renderIssue).join('')}</div></div>`;
       issuesSec.querySelectorAll('.issue-row').forEach(row => {
@@ -255,7 +254,7 @@
 
     window.addEventListener('load', () => {
       const h = sessionStorage.getItem('lastHtml'), rep = sessionStorage.getItem('lastHtmlReport');
-      if (h && rep) { quill.root.innerHTML = h; const r = JSON.parse(rep); renderSummary(r); renderIssues(r); }
+      if (h && rep) { taEl.value = h; const r = JSON.parse(rep); renderSummary(r); renderIssues(r); }
     });
   </script>
 </body>

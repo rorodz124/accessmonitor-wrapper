@@ -13,12 +13,12 @@ services:
       RATE_LIMIT_LIMIT: 10
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1"]
-      interval: 30s
-      timeout: 10s
+      interval: 10s
+      timeout: 5s
       retries: 10
+      start_period: 15s
     networks:
       - access-monitor-network
-
 
   wrapper-api:
     build:
@@ -28,12 +28,13 @@ services:
     ports:
       - "5297:5297"
     environment:
+      - ASPNETCORE_ENVIRONMENT=Production
       - AccessMonitor__BaseUrl=http://accessmonitor-backend:3000
       - AccessMonitor__Referer=http://localhost:3000
-      - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       accessmonitor-backend:
         condition: service_healthy
+    restart: on-failure
     networks:
       - access-monitor-network
 

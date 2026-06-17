@@ -123,25 +123,36 @@
 
     function getInner(r) { return r?.data?.data ?? r?.data ?? r; }
 
+    function parseScore(v) { return parseFloat(String(v ?? '').replace(',', '.')); }
+
     function normalizeVerdict(v) {
       const s = String(v ?? '').trim().toLowerCase();
-      if (['failed','fail','false'].includes(s)) return 'failed';
-      if (['warning','warn'].includes(s))        return 'warning';
-      if (['passed','pass','true','success'].includes(s)) return 'passed';
-      return 'inapplicable';
+      if (['failed','fail','false','error','errors'].includes(s)) return 'failed';
+      if (['warning','warn','alert'].includes(s))        return 'warning';
+      if (['passed','pass','true','success','ok'].includes(s)) return 'passed';
+      if (['inapplicable','n/a','na','not applicable','nao aplicavel'].includes(s)) return 'inapplicable';
+      console.warn('AccessMonitor devolveu um verdict desconhecido:', v);
+      return 'warning';
     }
 
     function extractItems(report) {
       const nodes = getInner(report)?.nodes ?? {};
-      const items = [];
+      const groups = new Map();
       for (const [criterion, checks] of Object.entries(nodes)) {
         if (!Array.isArray(checks)) continue;
         for (const check of checks) {
           const v = normalizeVerdict(check.verdict);
-          if (v !== 'inapplicable') items.push({ verdict: v, raw: check });
+          if (v === 'inapplicable') continue;
+          const description = check.description || criterion;
+          const key = `${v}|${check.resultCode||''}|${description}`;
+          if (!groups.has(key)) {
+            groups.set(key, { verdict: v, raw: { criterion, description, resultCode: check.resultCode, elements: [] } });
+          }
+          const g = groups.get(key).raw;
+          if (Array.isArray(check.elements)) g.elements.push(...check.elements);
         }
       }
-      return items;
+      return [...groups.values()];
     }
 
     function renderGauge(score, targetId) {
@@ -177,7 +188,7 @@
 
     function renderSummary(report) {
       const inner = getInner(report);
-      const score = inner?.score != null ? parseFloat(inner.score) : 0;
+      const score = inner?.score != null ? parseScore(inner.score) : 0;
       const totalElems = inner?.elems
         ? Object.values(inner.elems).reduce((s, v) => s + (typeof v === 'number' ? v : 0), 0)
         : null;
@@ -200,7 +211,7 @@
             <div class="results-summary">
               <div class="result-pill passed">
                 <span class="pill-count">${counts.passed}</span>
-                <span>Passou</span>
+                <span>Passaram</span>
               </div>
               <div class="result-pill warning">
                 <span class="pill-count">${counts.warning}</span>
@@ -208,7 +219,7 @@
               </div>
               <div class="result-pill failed">
                 <span class="pill-count">${counts.failed}</span>
-                <span>Falhou</span>
+                <span>Falharam</span>
               </div>
             </div>
           </div>
